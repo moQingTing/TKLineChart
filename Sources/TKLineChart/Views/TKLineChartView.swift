@@ -15,9 +15,7 @@ public class TKLineChartView: UIView {
     
     public var mainState: MainState = .none {
         didSet {
-            if mainState != oldValue {
-                setNeedsDisplay()
-            }
+            setNeedsDisplay()
         }
     }
     
@@ -47,9 +45,7 @@ public class TKLineChartView: UIView {
     
     public var secondaryStates: [SecondaryState] = [] {
         didSet {
-            if secondaryStates != oldValue {
-                setNeedsDisplay()
-            }
+            setNeedsDisplay()
         }
     }
     

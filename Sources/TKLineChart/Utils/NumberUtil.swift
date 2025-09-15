@@ -1,32 +1,31 @@
 import Foundation
 
 public class NumberUtil {
-    nonisolated(unsafe) private static var _fractionDigits: Int = 2
-    
+    // 小数位由外部配置 ChartConfiguration.shared.numberFractionDigits 决定
     public static var fractionDigits: Int {
-        get { return _fractionDigits }
-        set { _fractionDigits = newValue }
+        get { return ChartConfiguration.shared.numberFractionDigits }
+        set { ChartConfiguration.shared.numberFractionDigits = newValue }
     }
     
     public static func volFormat(_ n: Double) -> String {
         if abs(n) >= 1_000 && abs(n) < 1_000_000 {
             let d = n / 1_000
-            return trimTrailingZeros(String(format: "%.2f", d)) + "k"
+            return trimTrailingZeros(formatWithGrouping(d, fractionDigits: fractionDigits)) + "k"
         } else if abs(n) >= 1_000_000 && abs(n) < 1_000_000_000 {
             let d = n / 1_000_000
-            return trimTrailingZeros(String(format: "%.2f", d)) + "M"
+            return trimTrailingZeros(formatWithGrouping(d, fractionDigits: fractionDigits)) + "M"
         } else if abs(n) >= 1_000_000_000 && abs(n) < 1_000_000_000_000 {
             let d = n / 1_000_000_000
-            return trimTrailingZeros(String(format: "%.2f", d)) + "B"
+            return trimTrailingZeros(formatWithGrouping(d, fractionDigits: fractionDigits)) + "B"
         } else if abs(n) >= 1_000_000_000_000 {
             let d = n / 1_000_000_000_000
-            return trimTrailingZeros(String(format: "%.2f", d)) + "T"
+            return trimTrailingZeros(formatWithGrouping(d, fractionDigits: fractionDigits)) + "T"
         }
-        return trimTrailingZeros(String(format: "%.2f", n))
+        return trimTrailingZeros(formatWithGrouping(n, fractionDigits: fractionDigits))
     }
     
     public static func format(_ price: Double) -> String {
-        return formatNum(price, _fractionDigits)
+        return formatWithGrouping(price, fractionDigits: fractionDigits)
     }
     
     /// 取小数点后几位
@@ -34,21 +33,7 @@ public class NumberUtil {
     ///   - num: 数值
     ///   - location: 几位
     public static func formatNum(_ num: Double, _ location: Int) -> String {
-        let numStr = String(num)
-        let components = numStr.components(separatedBy: ".")
-        
-        if components.count == 1 {
-            // 整数
-            return String(format: "%.\(location)f", num)
-        } else {
-            let decimalPart = components[1]
-            if decimalPart.count < location {
-                return String(format: "%.\(location)f", num)
-            } else {
-                let truncatedDecimal = String(decimalPart.prefix(location))
-                return "\(components[0]).\(truncatedDecimal)"
-            }
-        }
+        return formatWithGrouping(num, fractionDigits: location)
     }
 
     // 通用缩写：1000->1k, 1_000_000->1M, 1_000_000_000->1B, 1_000_000_000_000->1T
@@ -63,5 +48,18 @@ public class NumberUtil {
             if str.hasSuffix(".") { str.removeLast() }
         }
         return str
+    }
+
+    private static func formatWithGrouping(_ n: Double, fractionDigits: Int) -> String {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.usesGroupingSeparator = true
+        f.groupingSeparator = ","
+        f.minimumFractionDigits = fractionDigits
+        f.maximumFractionDigits = fractionDigits
+        if let s = f.string(from: NSNumber(value: n)) {
+            return s
+        }
+        return String(format: "%.*f", fractionDigits, n)
     }
 }

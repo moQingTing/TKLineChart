@@ -5,7 +5,7 @@ open class BaseChartPainter {
     nonisolated(unsafe) public static var maxScrollX: Double = 0.0
     
     public var datas: [CompleteKLineEntity]?
-    public var mainState: MainState = .ma
+    public var mainState: MainState = .none
     public var scaleX: Double = 1.0
     public var scrollX: Double = 0.0
     public var selectX: Double = 0.0
@@ -46,7 +46,7 @@ open class BaseChartPainter {
     ]
     
     public init(datas: [CompleteKLineEntity]?, scaleX: Double, scrollX: Double, isLongPress: Bool, 
-                selectX: Double, chartStyle: ChartStyle, mainState: MainState = .ma, isLine: Bool = false) {
+                selectX: Double, chartStyle: ChartStyle, mainState: MainState = .none, isLine: Bool = false) {
         self.datas = datas
         self.scaleX = scaleX
         self.scrollX = scrollX
@@ -136,30 +136,26 @@ open class BaseChartPainter {
             var maxPrice = item.high
             var minPrice = item.low
             
-            if mainState == .ma {
-                if item.MA5Price != 0 {
-                    maxPrice = max(maxPrice, item.MA5Price)
-                    minPrice = min(minPrice, item.MA5Price)
+            switch mainState {
+            case let .ma(p1, p2, p3):
+                for p in [p1, p2, p3] {
+                    if p > 0, let v = item.maPrices[p], v != 0 {
+                        maxPrice = max(maxPrice, v)
+                        minPrice = min(minPrice, v)
+                    }
                 }
-                if item.MA10Price != 0 {
-                    maxPrice = max(maxPrice, item.MA10Price)
-                    minPrice = min(minPrice, item.MA10Price)
-                }
-                if item.MA20Price != 0 {
-                    maxPrice = max(maxPrice, item.MA20Price)
-                    minPrice = min(minPrice, item.MA20Price)
-                }
-                if item.MA30Price != 0 {
-                    maxPrice = max(maxPrice, item.MA30Price)
-                    minPrice = min(minPrice, item.MA30Price)
-                }
-            } else if mainState == .boll {
+            case .ema:
+                // 目前 DataUtil 生成的是 MA、BOLL；EMA 如需参与范围，按已有字段扩展后加入
+                break
+            case .boll:
                 if item.up != 0 {
                     maxPrice = max(item.up, item.high)
                 }
                 if item.dn != 0 {
                     minPrice = min(item.dn, item.low)
                 }
+            case .none:
+                break
             }
             
             mainMaxValue = max(mainMaxValue, maxPrice)
@@ -176,9 +172,13 @@ open class BaseChartPainter {
         }
     }
     
-    public func getVolMaxMinValue(_ item: CompleteKLineEntity) {
-        volMaxValue = max(volMaxValue, max(item.volume, max(item.MA5Volume, item.MA10Volume)))
-        volMinValue = min(volMinValue, min(item.volume, min(item.MA5Volume, item.MA10Volume)))
+    public func getVolMaxMinValue(_ item: CompleteKLineEntity, _ p1: Int, _ p2: Int) {
+        var vMax = item.volume
+        var vMin = item.volume
+        if p1 > 0, let v1 = item.volumeMAs[p1], v1 != 0 { vMax = max(vMax, v1); vMin = min(vMin, v1) }
+        if p2 > 0, let v2 = item.volumeMAs[p2], v2 != 0 { vMax = max(vMax, v2); vMin = min(vMin, v2) }
+        volMaxValue = max(volMaxValue, vMax)
+        volMinValue = min(volMinValue, vMin)
     }
     
     public func getSecondaryMaxMinValue(_ item: CompleteKLineEntity, _ secondaryState: SecondaryState, _ maxMinEntity: inout KMaxMinEntity) {
@@ -195,9 +195,13 @@ open class BaseChartPainter {
         case .wr:
             maxMinEntity.max = max(maxMinEntity.max, item.r)
             maxMinEntity.min = min(maxMinEntity.min, item.r)
-        case .vol:
-            maxMinEntity.max = max(maxMinEntity.max, max(item.volume, max(item.MA5Volume, item.MA10Volume)))
-            maxMinEntity.min = min(maxMinEntity.min, min(item.volume, min(item.MA5Volume, item.MA10Volume)))
+        case let .vol(p1, p2):
+            var vMax = item.volume
+            var vMin = item.volume
+            if p1 > 0, let v1 = item.volumeMAs[p1] { vMax = max(vMax, v1); vMin = min(vMin, v1) }
+            if p2 > 0, let v2 = item.volumeMAs[p2] { vMax = max(vMax, v2); vMin = min(vMin, v2) }
+            maxMinEntity.max = max(maxMinEntity.max, vMax)
+            maxMinEntity.min = min(maxMinEntity.min, vMin)
         }
     }
     

@@ -38,23 +38,28 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     public override func drawText(_ canvas: CGContext, data: CompleteKLineEntity, x: Double) {
         var textComponents: [NSAttributedString] = []
         
-        if state == .ma {
-            if data.MA5Price != 0 {
-                let text = NSAttributedString(string: "MA5:\(format(data.MA5Price))    ", 
-                                            attributes: getTextStyle(chartColors.ma5Color, fontSize: chartStyle.defaultTextSize))
+        switch state {
+        case let .ma(p1, p2, p3):
+            let periods = [p1, p2, p3]
+            let maColors = ChartConfiguration.shared.movingAverageStyle.maColors
+            for period in periods {
+                guard period > 0, let v = data.maPrices[period], v != 0 else { continue }
+                let color = maColors[period] ?? chartColors.kLineColor
+                let text = NSAttributedString(string: "MA(\(period)):\(format(v))    ",
+                                            attributes: getTextStyle(color, fontSize: chartStyle.defaultTextSize))
                 textComponents.append(text)
             }
-            if data.MA10Price != 0 {
-                let text = NSAttributedString(string: "MA10:\(format(data.MA10Price))    ", 
-                                            attributes: getTextStyle(chartColors.ma10Color, fontSize: chartStyle.defaultTextSize))
+        case let .ema(p1, p2, p3):
+            let periods = [p1, p2, p3]
+            let colors = ChartConfiguration.shared.emaStyle.colors
+            for period in periods {
+                guard period > 0, let v = data.emaPrices[period], v != 0 else { continue }
+                let color = colors[period] ?? chartColors.kLineColor
+                let text = NSAttributedString(string: "EMA(\(period)):\(format(v))    ",
+                                            attributes: getTextStyle(color, fontSize: chartStyle.defaultTextSize))
                 textComponents.append(text)
             }
-            if data.MA30Price != 0 {
-                let text = NSAttributedString(string: "MA30:\(format(data.MA30Price))    ", 
-                                            attributes: getTextStyle(chartColors.ma30Color, fontSize: chartStyle.defaultTextSize))
-                textComponents.append(text)
-            }
-        } else if state == .boll {
+        case .boll:
             if data.mb != 0 {
                 let text = NSAttributedString(string: "BOLL:\(format(data.mb))    ", 
                                             attributes: getTextStyle(chartColors.ma5Color, fontSize: chartStyle.defaultTextSize))
@@ -70,6 +75,8 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
                                             attributes: getTextStyle(chartColors.ma30Color, fontSize: chartStyle.defaultTextSize))
                 textComponents.append(text)
             }
+        case .none:
+            break
         }
         
         guard !textComponents.isEmpty else { return }
@@ -93,10 +100,17 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         
         if isLine {
             drawLine(lastPoint.close, curPoint.close, canvas: canvas, lastX: lastX, curX: curX)
-        } else if state == .ma {
-            drawMaLine(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
-        } else if state == .boll {
-            drawBollLine(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
+        } else {
+            switch state {
+            case let .ma(p1, p2, p3):
+                drawMaLine(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX, periods: [p1, p2, p3])
+            case let .ema(p1, p2, p3):
+                drawEmaLine(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX, periods: [p1, p2, p3])
+            case .boll:
+                drawBollLine(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
+            case .none:
+                break
+            }
         }
     }
     
@@ -150,18 +164,25 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         canvas.strokePath()
     }
     
-    private func drawMaLine(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity, 
-                           canvas: CGContext, lastX: Double, curX: Double) {
-        let config = ChartConfiguration.shared
-        
-        if lastPoint.MA5Price != 0 {
-            drawLine(lastPoint.MA5Price, curPoint.MA5Price, canvas: canvas, lastX: lastX, curX: curX, color: config.movingAverageStyle.ma5Color)
+    private func drawMaLine(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
+                           canvas: CGContext, lastX: Double, curX: Double, periods: [Int]) {
+        let maColors = ChartConfiguration.shared.movingAverageStyle.maColors
+        for period in periods {
+            guard period > 0 else { continue }
+            guard let lastV = lastPoint.maPrices[period], let curV = curPoint.maPrices[period], lastV != 0 && curV != 0 else { continue }
+            let color = maColors[period] ?? chartColors.kLineColor
+            drawLine(lastV, curV, canvas: canvas, lastX: lastX, curX: curX, color: color)
         }
-        if lastPoint.MA10Price != 0 {
-            drawLine(lastPoint.MA10Price, curPoint.MA10Price, canvas: canvas, lastX: lastX, curX: curX, color: config.movingAverageStyle.ma10Color)
-        }
-        if lastPoint.MA30Price != 0 {
-            drawLine(lastPoint.MA30Price, curPoint.MA30Price, canvas: canvas, lastX: lastX, curX: curX, color: config.movingAverageStyle.ma30Color)
+    }
+
+    private func drawEmaLine(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
+                            canvas: CGContext, lastX: Double, curX: Double, periods: [Int]) {
+        let colors = ChartConfiguration.shared.emaStyle.colors
+        for period in periods {
+            guard period > 0 else { continue }
+            guard let lastV = lastPoint.emaPrices[period], let curV = curPoint.emaPrices[period], lastV != 0 && curV != 0 else { continue }
+            let color = colors[period] ?? chartColors.kLineColor
+            drawLine(lastV, curV, canvas: canvas, lastX: lastX, curX: curX, color: color)
         }
     }
     

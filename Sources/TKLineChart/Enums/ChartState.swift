@@ -1,25 +1,19 @@
 import Foundation
 
-// MARK: - 主图状态
-public enum MainState: String, CaseIterable {
-    case ma = "ma"
-    case boll = "boll"
-    case none = "none"
-    
-    public var name: String {
-        return self.rawValue
-    }
+// MARK: - 主图状态（带参数的枚举不使用 CaseIterable/rawValue）
+public enum MainState: Hashable {
+    case ma(Int, Int, Int)
+    case ema(Int, Int, Int)
+    case boll(Int, Int)
+    case none
 }
 
 // MARK: - 副图状态
-public enum SecondaryState: String, CaseIterable {
-    case macd = "macd"
-    case kdj = "kdj"
-    case rsi = "rsi"
-    case wr = "wr"
-    case vol = "vol"
-    
-    public var name: String {
-        return self.rawValue
-    }
+public enum SecondaryState: Hashable {
+    case kdj(Int, Int, Int)
+    case macd(Int, Int, Int)
+    case rsi(Int)
+    case wr(Int)
+    // 成交量 MA5 和 MA10
+    case vol(Int, Int)
 }

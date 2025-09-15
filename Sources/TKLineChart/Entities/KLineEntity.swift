@@ -50,19 +50,16 @@ public class KLineEntity {
 
 // MARK: - 技术指标协议
 public protocol CandleEntity {
-    var MA5Price: Double { get set }
-    var MA10Price: Double { get set }
-    var MA20Price: Double { get set }
-    var MA30Price: Double { get set }
-    var MA60Price: Double { get set }
+    // 参数化价格均线：key 为周期，value 为对应均线
+    var maPrices: [Int: Double] { get set }
     var up: Double { get set }      // 布林带上轨
     var mb: Double { get set }      // 布林带中轨
     var dn: Double { get set }      // 布林带下轨
 }
 
 public protocol VolumeEntity {
-    var MA5Volume: Double { get set }
-    var MA10Volume: Double { get set }
+    // 参数化成交量均线：key 为周期，value 为对应均量
+    var volumeMAs: [Int: Double] { get set }
 }
 
 public protocol KDJEntity {
@@ -85,25 +82,18 @@ public protocol MACDEntity {
     var dea: Double { get set }
     var dif: Double { get set }
     var macd: Double { get set }
-    var ema12: Double { get set }
-    var ema26: Double { get set }
+    var emaPrices: [Int: Double] { get set }
 }
 
 // MARK: - 完整的K线实体
 public class CompleteKLineEntity: KLineEntity, CandleEntity, VolumeEntity, KDJEntity, RSIEntity, WREntity, MACDEntity, Equatable {
     // CandleEntity
-    public var MA5Price: Double = 0
-    public var MA10Price: Double = 0
-    public var MA20Price: Double = 0
-    public var MA30Price: Double = 0
-    public var MA60Price: Double = 0
     public var up: Double = 0
     public var mb: Double = 0
     public var dn: Double = 0
     
     // VolumeEntity
-    public var MA5Volume: Double = 0
-    public var MA10Volume: Double = 0
+    public var volumeMAs: [Int: Double] = [:]
     
     // KDJEntity
     public var k: Double = 0
@@ -122,8 +112,11 @@ public class CompleteKLineEntity: KLineEntity, CandleEntity, VolumeEntity, KDJEn
     public var dea: Double = 0
     public var dif: Double = 0
     public var macd: Double = 0
-    public var ema12: Double = 0
-    public var ema26: Double = 0
+    
+    // 动态价格均线字典（MA/EMA 皆可存放）：key 为周期（如 5/10/20/12/26），value 为对应均线值
+    public var maPrices: [Int: Double] = [:]
+    // EMA 动态字典（如需与 MA 分离存放）
+    public var emaPrices: [Int: Double] = [:]
     
     public override init() {
         super.init()

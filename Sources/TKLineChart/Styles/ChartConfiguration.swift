@@ -31,6 +31,33 @@ public class ChartConfiguration {
         public var ma30Color: UIColor = UIColor(red: 0.5, green: 0.0, blue: 0.5, alpha: 1.0) // 深紫色
         // 线宽
         public var lineWidth: Double = 1.0
+
+        // 通用周期到颜色映射，便于按任意周期取色
+        public var maColors: [Int: UIColor] {
+            return [
+                5: ma5Color,
+                10: ma10Color,
+                20: ma20Color,
+                30: ma30Color,
+                // 如需 MA60，可单独配置；默认复用 MA30 配色
+                60: ma30Color
+            ]
+        }
+    }
+
+    // MARK: - 指数移动平均线配置（独立于 MA）
+    public struct EMAStyle {
+        // 可按周期自定义颜色
+        public var colors: [Int: UIColor] = [
+            5: UIColor(red: 0.95, green: 0.55, blue: 0.15, alpha: 1.0),   // 橙色
+            10: UIColor(red: 0.20, green: 0.65, blue: 0.85, alpha: 1.0),  // 天蓝
+            12: UIColor(red: 0.90, green: 0.25, blue: 0.25, alpha: 1.0),  // 红
+            20: UIColor(red: 0.25, green: 0.80, blue: 0.45, alpha: 1.0),  // 绿
+            26: UIColor(red: 0.55, green: 0.35, blue: 0.80, alpha: 1.0),  // 紫
+            30: UIColor(red: 0.10, green: 0.45, blue: 0.90, alpha: 1.0),  // 蓝
+            60: UIColor(red: 0.35, green: 0.35, blue: 0.35, alpha: 1.0)   // 灰
+        ]
+        public var lineWidth: Double = 1.0
     }
     
     // MARK: - 布林带配置
@@ -86,6 +113,11 @@ public class ChartConfiguration {
         // 超买超卖线颜色
         public var overboughtColor: UIColor = UIColor.red.withAlphaComponent(0.3)
         public var oversoldColor: UIColor = UIColor.green.withAlphaComponent(0.3)
+        // 通用周期颜色映射 + 默认周期
+        public var rsiColors: [Int: UIColor] {
+            return [6: rsi6Color, 12: rsi12Color, 24: rsi24Color]
+        }
+        public var rsiDefaultPeriod: Int = 14
     }
     
     // MARK: - 成交量配置
@@ -99,6 +131,8 @@ public class ChartConfiguration {
         // 成交量MA线颜色
         public var ma5Color: UIColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         public var ma10Color: UIColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
+        // 参数化周期颜色映射
+        public var maColors: [Int: UIColor] { return [5: ma5Color, 10: ma10Color] }
     }
     
     // MARK: - OBV配置
@@ -207,6 +241,9 @@ public class ChartConfiguration {
     public var realTimeStyle = RealTimeStyle()
     public var infoPanelTexts = InfoPanelTexts()
     public var infoPanelStyle = InfoPanelStyle()
+    public var emaStyle = EMAStyle()
+    // 数字格式：全局小数位（价格/指标等），可外部配置
+    public var numberFractionDigits: Int = 2
 
     // MARK: - 信息面板多语言预设
     public enum InfoPanelLocalePreset {

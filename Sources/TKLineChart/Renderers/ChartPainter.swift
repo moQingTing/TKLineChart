@@ -4,11 +4,10 @@ public class ChartPainter: BaseChartPainter {
     nonisolated(unsafe) public static var lastRealTimeLabelRect: CGRect = .zero
     
     private var mainRenderer: MainRenderer?
-    private var volRenderer: VolRenderer?
     private var secondaryRenderer: SecondaryRenderer?
     
     // 副图相关
-    private var secondaryChartRendererMap: [SecondaryState: any BaseChartRenderer] = [:]
+    private var secondaryChartRendererMap: [SecondaryState: BaseChartRendererImpl<CompleteKLineEntity>] = [:]
     private var secondaryRectMap: [SecondaryState: CGRect] = [:]
     private var secondaryMaxMinMap: [SecondaryState: KMaxMinEntity] = [:]
     private let secondaryStates: [SecondaryState]
@@ -32,8 +31,10 @@ public class ChartPainter: BaseChartPainter {
         super.initRect(size)
         
         width = Double(size.width)
-        // 与 Flutter 对齐：布局层面的右侧留白只使用基础计算，不叠加实时价格的 rightInset
-        marginRight = ((width) / 5 - pointWidth) / scaleX
+        // 恢复对实时价格 rightInset 的支持：在布局层面为右侧增加可配置留白
+        // 注意：rightInset 是屏幕像素，这里需按 scaleX 转为内容坐标
+        let rtInset = chartStyle.realTimePriceStyle.rightInset / scaleX
+        marginRight = ((width) / 5 - pointWidth) / scaleX + rtInset
         
         // 计算主图和副图的高度分配
         let secondaryCount = secondaryStates.count
@@ -107,16 +108,10 @@ public class ChartPainter: BaseChartPainter {
             let maxMinEntity = secondaryMaxMinMap[secondaryState] ?? 
                               KMaxMinEntity(max: Double.greatestFiniteMagnitude, min: -Double.greatestFiniteMagnitude)
             
-            if secondaryState == .vol {
-                secondaryChartRendererMap[secondaryState] = VolRenderer(
-                    chartRect: rect, maxValue: maxMinEntity.max, minValue: maxMinEntity.min,
-                    topPadding: chartStyle.childPadding, chartStyle: chartStyle, chartColors: chartColors)
-            } else {
-                secondaryChartRendererMap[secondaryState] = SecondaryRenderer(
-                    chartRect: rect, maxValue: maxMinEntity.max, minValue: maxMinEntity.min,
-                    topPadding: chartStyle.childPadding, secondaryState: secondaryState,
-                    chartStyle: chartStyle, chartColors: chartColors)
-            }
+            secondaryChartRendererMap[secondaryState] = SecondaryRenderer(
+                chartRect: rect, maxValue: maxMinEntity.max, minValue: maxMinEntity.min,
+                topPadding: chartStyle.childPadding, secondaryState: secondaryState,
+                chartStyle: chartStyle, chartColors: chartColors)
         }
     }
     
@@ -164,13 +159,7 @@ public class ChartPainter: BaseChartPainter {
             
             // 绘制副图（多个副图分别绘制）
             for (_, renderer) in secondaryChartRendererMap {
-                if let volRenderer = renderer as? VolRenderer {
-                    volRenderer.drawChart(lastPoint, curPoint, lastX: lastX, curX: curX, 
-                                        size: size, canvas: canvas)
-                } else if let secondaryRenderer = renderer as? SecondaryRenderer {
-                    secondaryRenderer.drawChart(lastPoint, curPoint, lastX: lastX, curX: curX, 
-                                              size: size, canvas: canvas)
-                }
+                renderer.drawChart(lastPoint, curPoint, lastX: lastX, curX: curX, size: size, canvas: canvas)
             }
         }
         
@@ -412,13 +401,7 @@ public class ChartPainter: BaseChartPainter {
         mainRenderer?.drawText(canvas, data: dataToShow, x: x)
         
         for (_, renderer) in secondaryChartRendererMap {
-            if let mainRenderer = renderer as? MainRenderer {
-                mainRenderer.drawText(canvas, data: dataToShow, x: x)
-            } else if let volRenderer = renderer as? VolRenderer {
-                volRenderer.drawText(canvas, data: dataToShow, x: x)
-            } else if let secondaryRenderer = renderer as? SecondaryRenderer {
-                secondaryRenderer.drawText(canvas, data: dataToShow, x: x)
-            }
+            renderer.drawText(canvas, data: dataToShow, x: x)
         }
     }
     
@@ -534,7 +517,8 @@ public class ChartPainter: BaseChartPainter {
             // 绘制价格背景（使用样式配置）
             // 纠正越界：背景矩形右对齐在屏幕内
             let rectWidth = text.size().width + 2 * textPadding
-            var left = width - rectWidth
+            let edgeInset: Double = 1.0 // 防边框被遮住
+            var left = width - rectWidth - edgeInset
             if left < 0 { left = 0 }
             let top = y - text.size().height / 2 - rt.labelExtraHeight / 2
             let radius: Double = rt.labelCornerRadius
@@ -583,11 +567,18 @@ public class ChartPainter: BaseChartPainter {
             let triangleHeight: Double = rt.triangleHeight
             let triangleWidth: Double = rt.triangleWidth
             
-            let left = width - text.size().width * 2.5
+            var left = width - text.size().width * 2.5
             let top = adjustedY - text.size().height / 2 - padding - rt.labelExtraHeight / 2
-            let right = left + text.size().width + padding * 2 + triangleWidth + padding
+            var right = left + text.size().width + padding * 2 + triangleWidth + padding
             let bottom = top + text.size().height + padding * 2 + rt.labelExtraHeight
             let rectRadius = (bottom - top) / 2
+            // 右侧防裁剪
+            let edgeInset2: Double = 1.0
+            if right > width - edgeInset2 {
+                let shift = right - (width - edgeInset2)
+                left -= shift
+                right -= shift
+            }
             
             let rect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
             let roundedRect = UIBezierPath(roundedRect: rect, cornerRadius: CGFloat(rectRadius))

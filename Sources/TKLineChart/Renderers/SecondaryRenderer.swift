@@ -21,12 +21,12 @@ public class SecondaryRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             drawMACD(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
         case .kdj:
             drawKDJ(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
-        case .rsi:
-            drawRSI(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
-        case .wr:
+        case let .rsi(p):
+            drawRSI(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX, period: p)
+        case .wr(_):
             drawWR(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
-        case .vol:
-            drawVolume(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX)
+        case let .vol(p1, p2):
+            drawVolume(lastPoint, curPoint, canvas: canvas, lastX: lastX, curX: curX, p1: p1, p2: p2)
         }
     }
     
@@ -88,11 +88,11 @@ canvas: CGContext, lastX: Double, curX: Double) {
     }
     
     private func drawRSI(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
-                        canvas: CGContext, lastX: Double, curX: Double) {
+                        canvas: CGContext, lastX: Double, curX: Double, period: Int) {
         let config = ChartConfiguration.shared
-        
-        if lastPoint.rsi != 0 {
-            drawLine(lastPoint.rsi, curPoint.rsi, canvas: canvas, lastX: lastX, curX: curX, color: config.rsiStyle.rsi6Color)
+        let color = config.rsiStyle.rsiColors[period] ?? config.rsiStyle.rsi6Color
+        if lastPoint.rsi != 0 || curPoint.rsi != 0 {
+            drawLine(lastPoint.rsi, curPoint.rsi, canvas: canvas, lastX: lastX, curX: curX, color: color)
         }
     }
     
@@ -106,7 +106,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
     }
     
     private func drawVolume(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
-                           canvas: CGContext, lastX: Double, curX: Double) {
+                           canvas: CGContext, lastX: Double, curX: Double, p1: Int, p2: Int) {
         // 绘制成交量柱状图
         let volumeHeight = getY(0) - getY(curPoint.volume)
         let volumeY = getY(curPoint.volume)
@@ -120,12 +120,17 @@ canvas: CGContext, lastX: Double, curX: Double) {
                          width: chartStyle.volWidth, height: volumeHeight)
         canvas.fill(rect)
         
-        // 绘制成交量MA线
-        if lastPoint.MA5Volume != 0 {
-            drawLine(lastPoint.MA5Volume, curPoint.MA5Volume, canvas: canvas, lastX: lastX, curX: curX, color: config.volumeStyle.ma5Color)
+        // 绘制成交量MA线（参数化）
+        let colors = config.volumeStyle.maColors
+        let lastV1 = lastPoint.volumeMAs[p1] ?? 0
+        let curV1 = curPoint.volumeMAs[p1] ?? 0
+        if p1 > 0, lastV1 != 0 || curV1 != 0 {
+            drawLine(lastV1, curV1, canvas: canvas, lastX: lastX, curX: curX, color: colors[p1] ?? config.volumeStyle.ma5Color)
         }
-        if lastPoint.MA10Volume != 0 {
-            drawLine(lastPoint.MA10Volume, curPoint.MA10Volume, canvas: canvas, lastX: lastX, curX: curX, color: config.volumeStyle.ma10Color)
+        let lastV2 = lastPoint.volumeMAs[p2] ?? 0
+        let curV2 = curPoint.volumeMAs[p2] ?? 0
+        if p2 > 0, lastV2 != 0 || curV2 != 0 {
+            drawLine(lastV2, curV2, canvas: canvas, lastX: lastX, curX: curX, color: colors[p2] ?? config.volumeStyle.ma10Color)
         }
     }
     
@@ -167,24 +172,44 @@ canvas: CGContext, lastX: Double, curX: Double) {
                 textComponents.append(text)
             }
             
-        case .rsi:
+        case let .rsi(period):
             if data.rsi != 0 {
-                let text = NSAttributedString(string: "RSI:\(format(data.rsi))    ",
-                                            attributes: getTextStyle(chartColors.rsiColor, fontSize: chartStyle.defaultTextSize))
+                let color = ChartConfiguration.shared.rsiStyle.rsiColors[period] ?? chartColors.rsiColor
+                let text = NSAttributedString(string: "RSI(\(period)):\(format(data.rsi))    ",
+                                            attributes: getTextStyle(color, fontSize: chartStyle.defaultTextSize))
                 textComponents.append(text)
             }
             
-        case .wr:
+        case let .wr(period):
             if data.r != 0 {
-                let text = NSAttributedString(string: "WR:\(format(data.r))    ",
+                let text = NSAttributedString(string: "WR(\(period)):\(format(data.r))    ",
                                             attributes: getTextStyle(chartColors.rsiColor, fontSize: chartStyle.defaultTextSize))
                 textComponents.append(text)
             }
             
-        case .vol:
-            let text = NSAttributedString(string: "VOL:\(NumberUtil.volFormat(data.volume))    ",
-                                        attributes: getTextStyle(chartColors.volColor, fontSize: chartStyle.defaultTextSize))
-            textComponents.append(text)
+        case let .vol(p1, p2):
+            // VOL 当前成交量
+            let volText = NSAttributedString(string: "VOL: \(NumberUtil.volFormat(data.volume))    ",
+                                            attributes: getTextStyle(chartColors.volColor, fontSize: chartStyle.defaultTextSize))
+            textComponents.append(volText)
+
+            // 成交量MA(p1)
+            let v1 = data.volumeMAs[p1] ?? 0
+            if p1 > 0, v1 != 0 {
+                let color1 = ChartConfiguration.shared.volumeStyle.maColors[p1] ?? ChartConfiguration.shared.volumeStyle.ma5Color
+                let ma1Text = NSAttributedString(string: "MA(\(p1)): \(NumberUtil.volFormat(v1))    ",
+                                                attributes: getTextStyle(color1, fontSize: chartStyle.defaultTextSize))
+                textComponents.append(ma1Text)
+            }
+
+            // 成交量MA(p2)
+            let v2 = data.volumeMAs[p2] ?? 0
+            if p2 > 0, v2 != 0 {
+                let color2 = ChartConfiguration.shared.volumeStyle.maColors[p2] ?? ChartConfiguration.shared.volumeStyle.ma10Color
+                let ma2Text = NSAttributedString(string: "MA(\(p2)): \(NumberUtil.volFormat(v2))    ",
+                                                attributes: getTextStyle(color2, fontSize: chartStyle.defaultTextSize))
+                textComponents.append(ma2Text)
+            }
         }
         
         guard !textComponents.isEmpty else { return }

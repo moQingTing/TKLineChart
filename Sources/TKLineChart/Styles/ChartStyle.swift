@@ -250,7 +250,7 @@ public class ChartStyle {
         public var triangleWidth: Double = 5.0
         public var triangleHeight: Double = 8.0
         // 右侧内边距（增大蜡烛与实时价格的间距）
-        public var rightInset: Double = 35.0
+        public var rightInset: Double = 40.0
         // 右侧实时价格点击热区（像素），用于点击后回到最右
         public var tapHotZoneWidth: Double = 80.0
         
