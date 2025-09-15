@@ -321,8 +321,8 @@ public class ChartPainter: BaseChartPainter {
         let changeColor = change >= 0 ? upColor : downColor
         let changeText = NSAttributedString(string: "\(format(change)) (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor))
         let amplitudeText = NSAttributedString(string: String(format: "%.2f%%", amplitudePct), attributes: getTextStyle(valueColor))
-        let volumeText = NSAttributedString(string: format(point.volume), attributes: getTextStyle(valueColor))
-        let amountText = NSAttributedString(string: format(point.amount), attributes: getTextStyle(valueColor))
+        let volumeText = NSAttributedString(string: NumberUtil.abbreviate(point.volume), attributes: getTextStyle(valueColor))
+        let amountText = NSAttributedString(string: NumberUtil.abbreviate(point.amount), attributes: getTextStyle(valueColor))
 
         let i18n = ChartConfiguration.shared.infoPanelTexts
         let labels = [

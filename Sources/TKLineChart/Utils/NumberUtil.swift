@@ -9,14 +9,20 @@ public class NumberUtil {
     }
     
     public static func volFormat(_ n: Double) -> String {
-        if n > 10000 && n < 999999 {
-            let d = n / 1000
-            return String(format: "%.2fK", d)
-        } else if n > 1000000 {
-            let d = n / 1000000
-            return String(format: "%.2fM", d)
+        if abs(n) >= 1_000 && abs(n) < 1_000_000 {
+            let d = n / 1_000
+            return trimTrailingZeros(String(format: "%.2f", d)) + "k"
+        } else if abs(n) >= 1_000_000 && abs(n) < 1_000_000_000 {
+            let d = n / 1_000_000
+            return trimTrailingZeros(String(format: "%.2f", d)) + "M"
+        } else if abs(n) >= 1_000_000_000 && abs(n) < 1_000_000_000_000 {
+            let d = n / 1_000_000_000
+            return trimTrailingZeros(String(format: "%.2f", d)) + "B"
+        } else if abs(n) >= 1_000_000_000_000 {
+            let d = n / 1_000_000_000_000
+            return trimTrailingZeros(String(format: "%.2f", d)) + "T"
         }
-        return String(format: "%.2f", n)
+        return trimTrailingZeros(String(format: "%.2f", n))
     }
     
     public static func format(_ price: Double) -> String {
@@ -43,5 +49,19 @@ public class NumberUtil {
                 return "\(components[0]).\(truncatedDecimal)"
             }
         }
+    }
+
+    // 通用缩写：1000->1k, 1_000_000->1M, 1_000_000_000->1B, 1_000_000_000_000->1T
+    public static func abbreviate(_ n: Double) -> String {
+        return volFormat(n)
+    }
+
+    private static func trimTrailingZeros(_ s: String) -> String {
+        var str = s
+        while str.contains(".") && (str.hasSuffix("0") || str.hasSuffix(".")) {
+            if str.hasSuffix("0") { str.removeLast() }
+            if str.hasSuffix(".") { str.removeLast() }
+        }
+        return str
     }
 }
