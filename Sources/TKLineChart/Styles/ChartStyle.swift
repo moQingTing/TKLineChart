@@ -100,7 +100,11 @@ public class ChartColors {
     }
     
     public var xAxisTextColor: UIColor {
-        return UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+        return UIColor.white
+    }
+
+    public var xAxisTextBgColor: UIColor {
+        return UIColor.black
     }
     
     public var maxMinTextColor: UIColor {

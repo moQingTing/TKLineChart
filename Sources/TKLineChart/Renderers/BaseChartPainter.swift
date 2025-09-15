@@ -276,7 +276,10 @@ open class BaseChartPainter {
     }
     
     public func translateXtoX(_ translateX: Double) -> Double {
-        return (translateX + translateX) * scaleX
+        // 将内容坐标 translateX 映射为屏幕坐标 X
+        // drawChart 中应用了：先平移 translateX*scaleX，再按 scaleX 缩放
+        // 因此屏幕 X = (内容 X + 当前 translateX) * scaleX
+        return (translateX + self.translateX) * scaleX
     }
     
     public func getTextStyle(_ color: UIColor) -> [NSAttributedString.Key: Any] {

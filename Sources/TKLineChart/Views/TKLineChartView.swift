@@ -66,6 +66,7 @@ public class TKLineChartView: UIView {
     private var scaleX: Double = 1.0
     private var scrollX: Double = 0.0
     private var selectX: Double = 0.0
+    private var selectY: Double = 0.0
     private var isScale: Bool = false
     private var isDrag: Bool = false
     private var isLongPress: Bool = false
@@ -81,6 +82,7 @@ public class TKLineChartView: UIView {
     private var panGestureRecognizer: UIPanGestureRecognizer!
     private var pinchGestureRecognizer: UIPinchGestureRecognizer!
     private var longPressGestureRecognizer: UILongPressGestureRecognizer!
+    private var tapGestureRecognizer: UITapGestureRecognizer!
     
     // MARK: - 初始化
     public override init(frame: CGRect) {
@@ -116,8 +118,13 @@ public class TKLineChartView: UIView {
         longPressGestureRecognizer.minimumPressDuration = 0.5
         addGestureRecognizer(longPressGestureRecognizer)
         
+        // 点击手势（单击显示/隐藏所选点信息）
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        addGestureRecognizer(tapGestureRecognizer)
+
         // 设置手势优先级
         panGestureRecognizer.require(toFail: longPressGestureRecognizer)
+        // 点击与拖拽不冲突，允许同时识别。若希望点击优先，可在需要时调整delegate。
     }
     
     // MARK: - 绘制
@@ -132,6 +139,7 @@ public class TKLineChartView: UIView {
             scrollX: scrollX,
             isLongPress: isLongPress,
             selectX: selectX,
+            selectY: selectY,
             chartColors: chartColors,
             chartStyle: chartStyle,
             secondaryStates: secondaryStates,
@@ -212,6 +220,7 @@ public class TKLineChartView: UIView {
         switch gesture.state {
         case .began:
             isDrag = true
+            // 开始拖拽时清除选中点
             isLongPress = false
             userHasInteracted = true // 标记用户已经开始交互
             // 停止惯性滚动
@@ -263,10 +272,12 @@ public class TKLineChartView: UIView {
         case .began:
             isLongPress = true
             selectX = Double(location.x)
+            selectY = Double(location.y)
             setNeedsDisplay()
             
         case .changed:
             selectX = Double(location.x)
+            selectY = Double(location.y)
             setNeedsDisplay()
             
         case .ended, .cancelled:
@@ -276,6 +287,18 @@ public class TKLineChartView: UIView {
         default:
             break
         }
+    }
+
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: self)
+        // 单击时总是显示并更新选中点到点击位置
+        // 如果正在惯性滚动，需立即停止
+        stopDeceleration()
+        isLongPress = true
+        userHasInteracted = true
+        selectX = Double(location.x)
+        selectY = Double(location.y)
+        setNeedsDisplay()
     }
     
     // MARK: - 辅助方法

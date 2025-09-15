@@ -14,11 +14,14 @@ public class ChartPainter: BaseChartPainter {
     
     private let chartColors: ChartColors
     
+    private let selectY: Double
+
     public init(datas: [CompleteKLineEntity]?, scaleX: Double, scrollX: Double, isLongPress: Bool,
-                selectX: Double, chartColors: ChartColors, chartStyle: ChartStyle,
+                selectX: Double, selectY: Double, chartColors: ChartColors, chartStyle: ChartStyle,
                 secondaryStates: [SecondaryState], mainState: MainState, isLine: Bool) {
         self.chartColors = chartColors
         self.secondaryStates = secondaryStates
+        self.selectY = selectY
         
         super.init(datas: datas, scaleX: scaleX, scrollX: scrollX, isLongPress: isLongPress,
                   selectX: selectX, chartStyle: chartStyle, mainState: mainState, isLine: isLine)
@@ -209,14 +212,31 @@ public class ChartPainter: BaseChartPainter {
         let index = calculateSelectedX(selectX)
         guard let point = getItem(index) else { return }
         
-        let text = NSAttributedString(string: format(point.close), attributes: getTextStyle(.white))
+        // 根据主图Y坐标反算价格，使点击点不是固定close，而是主图纵坐标对应值
+        let selectedPrice: Double
+        if let mainRenderer = mainRenderer {
+            // 反推价格：value = maxValue - (y - minY) / scaleY
+            let yInMain = min(max(selectY, Double(mainRenderer.chartRect.minY)), Double(mainRenderer.chartRect.maxY))
+            selectedPrice = mainRenderer.maxValue - (yInMain - Double(mainRenderer.chartRect.minY)) / mainRenderer.scaleY
+        } else {
+            selectedPrice = point.close
+        }
+        
+        // 选中价格文字颜色：白色
+        let textColor = chartColors.xAxisTextColor
+        let text = NSAttributedString(string: format(selectedPrice), attributes: getTextStyle(textColor))
         let textHeight = text.size().height
         let textWidth = text.size().width
         
         let w1: Double = 5
         let w2: Double = 3
         let r = textHeight / 2 + w2
-        let y = mainRenderer?.getY(point.close) ?? 0
+        let y: Double
+        if let mainRenderer = mainRenderer {
+            y = mainRenderer.getY(selectedPrice)
+        } else {
+            y = 0
+        }
         let x: Double
         let isLeft: Bool
         
@@ -234,33 +254,123 @@ public class ChartPainter: BaseChartPainter {
             text.draw(at: CGPoint(x: x + w1 + w2, y: y - textHeight / 2))
         }
         
-        // 绘制日期信息
+        // 绘制日期信息（严格居中于竖线底部）
         let dateText = DataUtil.getDate(point.timestamp)
-        let dateTextAttr = NSAttributedString(string: dateText, attributes: getTextStyle(.white))
+        // 底部时间文字颜色：白色
+        let dateTextAttr = NSAttributedString(string: dateText, attributes: getTextStyle(textColor))
         let dateTextWidth = dateTextAttr.size().width
-        let dateX = translateXtoX(getX(index))
-        let dateY = Double(size.height) - chartStyle.bottomDateHigh
-        
-        let adjustedDateX: Double
-        if dateX < dateTextWidth + 2 * w1 {
-            adjustedDateX = 1 + dateTextWidth / 2 + w1
-        } else if width - dateX < dateTextWidth + 2 * w1 {
-            adjustedDateX = width - 1 - dateTextWidth / 2 - w1
-        } else {
-            adjustedDateX = dateX
-        }
-        
+        let bandTop = Double(size.height) - chartStyle.bottomDateHigh
         let baseLine = textHeight / 2
-        let dateRect = CGRect(x: adjustedDateX - dateTextWidth / 2 - w1, y: dateY,
-                             width: dateTextWidth + 2 * w1, height: baseLine + r)
+        let extraHeight: Double = 4 // 时间背景额外高度
+        let rectHeight = baseLine + r + extraHeight
+        let rectWidth = dateTextWidth + 2 * w1
         
-        canvas.setFillColor(chartColors.markerBgColor.cgColor)
-        canvas.setStrokeColor(chartColors.markerBorderColor.cgColor)
-        canvas.setLineWidth(0.5)
-        canvas.fill(dateRect)
-        canvas.stroke(dateRect)
+        // 目标中心点：与竖线相同的屏幕X
+        let targetCenterX = translateXtoX(getX(index))
         
-        dateTextAttr.draw(at: CGPoint(x: adjustedDateX - dateTextWidth / 2, y: dateY))
+        // 优先使用“居中于竖线”的矩形X
+        var rectX = targetCenterX - rectWidth / 2
+        // 边界保护：完整气泡不越界
+        if rectX < 0 { rectX = 0 }
+        if rectX + rectWidth > width { rectX = width - rectWidth }
+        
+        // 在底部日期带内垂直居中
+        var dateY = bandTop + (chartStyle.bottomDateHigh - rectHeight) / 2
+        if dateY < bandTop { dateY = bandTop }
+        if dateY + rectHeight > bandTop + chartStyle.bottomDateHigh { dateY = bandTop + chartStyle.bottomDateHigh - rectHeight }
+        
+        let dateRect = CGRect(x: rectX, y: dateY, width: rectWidth, height: rectHeight)
+        
+        // let infoStyle = ChartConfiguration.shared.infoPanelStyle
+        // 底部时间气泡使用固定圆角 4，无边框
+        let dateRounded = UIBezierPath(roundedRect: dateRect, cornerRadius: 4)
+        canvas.setFillColor(chartColors.xAxisTextBgColor.cgColor)
+        canvas.addPath(dateRounded.cgPath)
+        canvas.fillPath()
+        
+        // 文本在矩形内部水平、垂直居中
+        let dateSize = dateTextAttr.size()
+        let dateTextX = rectX + (rectWidth - dateSize.width) / 2
+        let dateTextY = dateY + (rectHeight - dateSize.height) / 2
+        dateTextAttr.draw(at: CGPoint(x: dateTextX, y: dateTextY))
+        // 选中信息面板
+        drawSelectedInfoPanel(canvas, size, point, isLeft: isLeft)
+    }
+
+    private func drawSelectedInfoPanel(_ canvas: CGContext, _ size: CGSize, _ point: CompleteKLineEntity, isLeft: Bool) {
+        guard let mainRenderer = mainRenderer else { return }
+        let infoStyle = ChartConfiguration.shared.infoPanelStyle
+        let padding: Double = 8
+        let lineSpace: Double = 4
+        // 面板字体统一黑色
+        let valueColor = infoStyle.textColor
+        let labelColor = infoStyle.textColor
+        let upColor = ChartConfiguration.shared.candleStyle.upColor
+        let downColor = ChartConfiguration.shared.candleStyle.downColor
+
+        let change = point.close - point.open
+        let changePct = point.open == 0 ? 0 : change / point.open * 100
+        let amplitudePct = point.open == 0 ? 0 : (point.high - point.low) / point.open * 100
+
+        let timeText = NSAttributedString(string: DataUtil.getDate(point.timestamp), attributes: getTextStyle(valueColor))
+        let openText = NSAttributedString(string: format(point.open), attributes: getTextStyle(valueColor))
+        let highText = NSAttributedString(string: format(point.high), attributes: getTextStyle(valueColor))
+        let lowText = NSAttributedString(string: format(point.low), attributes: getTextStyle(valueColor))
+        let closeText = NSAttributedString(string: format(point.close), attributes: getTextStyle(valueColor))
+        let changeColor = change >= 0 ? upColor : downColor
+        let changeText = NSAttributedString(string: "\(format(change)) (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor))
+        let amplitudeText = NSAttributedString(string: String(format: "%.2f%%", amplitudePct), attributes: getTextStyle(valueColor))
+        let volumeText = NSAttributedString(string: format(point.volume), attributes: getTextStyle(valueColor))
+        let amountText = NSAttributedString(string: format(point.amount), attributes: getTextStyle(valueColor))
+
+        let i18n = ChartConfiguration.shared.infoPanelTexts
+        let labels = [
+            NSAttributedString(string: i18n.time, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.open, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.high, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.low, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.close, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.change, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.amplitude, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.volume, attributes: getTextStyle(labelColor)),
+            NSAttributedString(string: i18n.amount, attributes: getTextStyle(labelColor))
+        ]
+        let values = [timeText, openText, highText, lowText, closeText, changeText, amplitudeText, volumeText, amountText]
+
+        var labelMaxW: Double = 0
+        var valueMaxW: Double = 0
+        for l in labels { labelMaxW = max(labelMaxW, l.size().width) }
+        for v in values { valueMaxW = max(valueMaxW, v.size().width) }
+        let contentW = labelMaxW + 10 + valueMaxW
+        let lineH = values.first?.size().height ?? 12
+        let contentH = Double(values.count) * (lineH + lineSpace) - lineSpace
+        let rectW = contentW + padding * 2
+        let rectH = contentH + padding * 2
+
+        let leftX = Double(mainRenderer.chartRect.minX) + 8
+        let rightX = Double(mainRenderer.chartRect.maxX) - rectW - 8
+        let panelX = isLeft ? rightX : leftX
+        let panelY = Double(mainRenderer.chartRect.minY) + 8
+
+        let rect = CGRect(x: panelX, y: panelY, width: rectW, height: rectH)
+        let rounded = UIBezierPath(roundedRect: rect, cornerRadius: CGFloat(infoStyle.cornerRadius))
+        canvas.setFillColor(infoStyle.backgroundColor.cgColor)
+        // 无边框
+        canvas.addPath(rounded.cgPath)
+        canvas.fillPath()
+
+        var cursorY = panelY + padding
+        // 列右边界（用于右对齐数值）
+        let valueRightX = panelX + padding + labelMaxW + 10 + valueMaxW
+        for i in 0..<values.count {
+            let l = labels[i]
+            let v = values[i]
+            // 标题（标签）左对齐
+            l.draw(at: CGPoint(x: panelX + padding, y: cursorY))
+            // 数值右对齐
+            v.draw(at: CGPoint(x: valueRightX - v.size().width, y: cursorY))
+            cursorY += lineH + lineSpace
+        }
     }
     
     private func drawInfoBox(_ canvas: CGContext, x: Double, y: Double, width: Double, height: Double, isLeft: Bool) {
@@ -344,11 +454,23 @@ public class ChartPainter: BaseChartPainter {
         let index = calculateSelectedX(selectX)
         guard let point = getItem(index) else { return }
         
-        canvas.setStrokeColor(chartColors.xyLineColor.cgColor)
+        // 交叉线统一用黑色
+        canvas.setStrokeColor(UIColor.black.cgColor)
         canvas.setLineWidth(CGFloat(chartStyle.vCrossWidth))
+        // 使用虚线样式
+        if chartStyle.dashWidth > 0 && chartStyle.dashSpace > 0 {
+            canvas.setLineDash(phase: 0, lengths: [CGFloat(chartStyle.dashWidth), CGFloat(chartStyle.dashSpace)])
+        }
         
         let x = getX(index)
-        let y = mainRenderer?.getY(point.close) ?? 0
+        let y: Double
+        if let mainRenderer = mainRenderer {
+            let yInMain = min(max(selectY, Double(mainRenderer.chartRect.minY)), Double(mainRenderer.chartRect.maxY))
+            let price = mainRenderer.maxValue - (yInMain - Double(mainRenderer.chartRect.minY)) / mainRenderer.scaleY
+            y = mainRenderer.getY(price)
+        } else {
+            y = 0
+        }
         
         // 绘制竖线
         canvas.move(to: CGPoint(x: x, y: chartStyle.topPadding))
@@ -362,8 +484,11 @@ public class ChartPainter: BaseChartPainter {
         canvas.strokePath()
         
         // 绘制交叉点
-        canvas.setFillColor(chartColors.pointColor.cgColor)
+        // 点击点也用黑色
+        canvas.setFillColor(UIColor.black.cgColor)
         canvas.fillEllipse(in: CGRect(x: x - 2, y: y - 2, width: 4, height: 4))
+        // 取消虚线设置，避免影响后续绘制
+        canvas.setLineDash(phase: 0, lengths: [])
     }
     
     public override func drawRealTimePrice(_ canvas: CGContext, _ size: CGSize) {

@@ -145,6 +145,38 @@ public class ChartConfiguration {
         // 时间文字颜色
         public var timeTextColor: UIColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
     }
+
+    // MARK: - 信息面板本地化文本
+    public struct InfoPanelTexts {
+        public var time: String = "时间"
+        public var open: String = "开"
+        public var high: String = "高"
+        public var low: String = "低"
+        public var close: String = "收"
+        public var change: String = "涨幅"
+        public var amplitude: String = "振幅"
+        public var volume: String = "量"
+        public var amount: String = "额"
+    }
+
+    // MARK: - 信息面板样式
+    public struct InfoPanelStyle {
+        // 浅灰半透明背景
+        public var backgroundColor: UIColor = UIColor(white: 0.95, alpha: 0.9)
+        // 文本颜色（默认黑色）
+        public var textColor: UIColor = UIColor.black
+        // 圆角半径
+        public var cornerRadius: Double = 8.0
+        // 边框颜色（沿用现有marker边框色更统一）
+        public var borderColor: UIColor = UIColor(red: 0.424, green: 0.478, blue: 0.525, alpha: 1.0)
+        public init() {}
+        public init(backgroundColor: UIColor, textColor: UIColor, cornerRadius: Double, borderColor: UIColor) {
+            self.backgroundColor = backgroundColor
+            self.textColor = textColor
+            self.cornerRadius = cornerRadius
+            self.borderColor = borderColor
+        }
+    }
     
     // MARK: - 实时数据配置
     public struct RealTimeStyle {
@@ -173,6 +205,52 @@ public class ChartConfiguration {
     public var backgroundStyle = BackgroundStyle()
     public var textStyle = TextStyle()
     public var realTimeStyle = RealTimeStyle()
+    public var infoPanelTexts = InfoPanelTexts()
+    public var infoPanelStyle = InfoPanelStyle()
+
+    // MARK: - 信息面板多语言预设
+    public enum InfoPanelLocalePreset {
+        case zhHans   // 简体中文
+        case zhHant   // 繁體中文
+        case en       // English
+        case ja       // 日本語
+        case ko       // 한국어
+    }
+
+    public static func infoPanelPreset(_ preset: InfoPanelLocalePreset) -> InfoPanelTexts {
+        switch preset {
+        case .zhHans:
+            return InfoPanelTexts(
+                time: "时间", open: "开", high: "高", low: "低", close: "收",
+                change: "涨幅", amplitude: "振幅", volume: "量", amount: "额"
+            )
+        case .zhHant:
+            return InfoPanelTexts(
+                time: "時間", open: "開", high: "高", low: "低", close: "收",
+                change: "漲幅", amplitude: "振幅", volume: "量", amount: "額"
+            )
+        case .en:
+            return InfoPanelTexts(
+                time: "Time", open: "Open", high: "High", low: "Low", close: "Close",
+                change: "Change", amplitude: "Amplitude", volume: "Vol", amount: "Amount"
+            )
+        case .ja:
+            return InfoPanelTexts(
+                time: "時間", open: "始値", high: "高値", low: "安値", close: "終値",
+                change: "騰落", amplitude: "変動幅", volume: "出来高", amount: "金額"
+            )
+        case .ko:
+            return InfoPanelTexts(
+                time: "시간", open: "시가", high: "고가", low: "저가", close: "종가",
+                change: "등락", amplitude: "변동폭", volume: "거래량", amount: "거래대금"
+            )
+        }
+    }
+
+    // 便捷方法：按预设切换信息面板语言
+    public func applyInfoPanelLocale(_ preset: InfoPanelLocalePreset) {
+        self.infoPanelTexts = ChartConfiguration.infoPanelPreset(preset)
+    }
     
     // MARK: - 预设主题
     public enum Theme {
