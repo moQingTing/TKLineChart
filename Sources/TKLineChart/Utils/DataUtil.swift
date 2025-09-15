@@ -4,7 +4,14 @@ public class DataUtil {
     
     // MARK: - 获取日期字符串
     public static func getDate(_ timestamp: Int) -> String {
-        let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
+        // 兼容毫秒/秒时间戳
+        let seconds: TimeInterval
+        if timestamp > 1_000_000_000_000 { // 毫秒级
+            seconds = TimeInterval(timestamp) / 1000.0
+        } else {
+            seconds = TimeInterval(timestamp)
+        }
+        let date = Date(timeIntervalSince1970: seconds)
         return DateFormatUtil.dateFormat(date, [
             DateFormatUtil.yyyy, "-", DateFormatUtil.mm, "-", DateFormatUtil.dd,
             " ", DateFormatUtil.HH, ":", DateFormatUtil.nn

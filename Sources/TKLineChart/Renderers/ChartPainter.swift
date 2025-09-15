@@ -120,12 +120,13 @@ public class ChartPainter: BaseChartPainter {
     
     public override func drawBg(_ canvas: CGContext, _ size: CGSize) {
         canvas.setFillColor(chartColors.bgColor.cgColor)
-        
         let mainRect = CGRect(x: 0, y: 0, width: mainRect.width, height: mainRect.height + chartStyle.topPadding)
         canvas.fill(mainRect)
-        
-        let dateRect = CGRect(x: 0, y: size.height - chartStyle.bottomDateHigh, 
+
+        // 底部日期带背景使用 xAxisTextBgColor（黑色），以便白色日期文字可见
+        let dateRect = CGRect(x: 0, y: size.height - chartStyle.bottomDateHigh,
                              width: size.width, height: chartStyle.bottomDateHigh)
+        // canvas.setFillColor(chartColors.xAxisTextBgColor.cgColor)
         canvas.fill(dateRect)
     }
     
@@ -223,7 +224,7 @@ public class ChartPainter: BaseChartPainter {
         }
         
         // 选中价格文字颜色：白色
-        let textColor = chartColors.xAxisTextColor
+        let textColor = chartColors.selectedPriceTextColor
         let text = NSAttributedString(string: format(selectedPrice), attributes: getTextStyle(textColor))
         let textHeight = text.size().height
         let textWidth = text.size().width
@@ -284,7 +285,7 @@ public class ChartPainter: BaseChartPainter {
         // let infoStyle = ChartConfiguration.shared.infoPanelStyle
         // 底部时间气泡使用固定圆角 4，无边框
         let dateRounded = UIBezierPath(roundedRect: dateRect, cornerRadius: 4)
-        canvas.setFillColor(chartColors.xAxisTextBgColor.cgColor)
+        canvas.setFillColor(chartColors.selectedPriceTextBgColor.cgColor)
         canvas.addPath(dateRounded.cgPath)
         canvas.fillPath()
         

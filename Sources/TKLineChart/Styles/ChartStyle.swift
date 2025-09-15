@@ -100,13 +100,19 @@ public class ChartColors {
     }
     
     public var xAxisTextColor: UIColor {
+        return UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+    }
+
+    // 选中价格文字颜色
+    public var selectedPriceTextColor: UIColor {
         return UIColor.white
     }
 
-    public var xAxisTextBgColor: UIColor {
+    // 选中价格文字背景颜色
+    public var selectedPriceTextBgColor: UIColor {
         return UIColor.black
     }
-    
+
     public var maxMinTextColor: UIColor {
         return UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
     }
