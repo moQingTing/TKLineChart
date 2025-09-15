@@ -291,6 +291,20 @@ public class TKLineChartView: UIView {
 
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: self)
+        // 仅当命中实时价格标签矩形才回到最右
+        let labelRect = ChartPainter.lastRealTimeLabelRect
+        if !labelRect.isEmpty && labelRect.contains(location) {
+            stopDeceleration()
+            isLongPress = false
+            // 回到设备右边：对于当前坐标系，最右端应为 scrollX = 0
+            // 不需要计算 minTranslateX，保持现有缩放即可
+            scrollX = 0
+            // 将选中位置移动到设备右侧，避免视觉上仍停留在左侧
+            selectX = Double(bounds.width) - 1.0
+            userHasInteracted = false
+            setNeedsDisplay()
+            return
+        }
         // 单击时总是显示并更新选中点到点击位置
         // 如果正在惯性滚动，需立即停止
         stopDeceleration()

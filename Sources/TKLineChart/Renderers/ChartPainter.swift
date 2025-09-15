@@ -1,6 +1,7 @@
 import UIKit
 
 public class ChartPainter: BaseChartPainter {
+    nonisolated(unsafe) public static var lastRealTimeLabelRect: CGRect = .zero
     
     private var mainRenderer: MainRenderer?
     private var volRenderer: VolRenderer?
@@ -31,6 +32,7 @@ public class ChartPainter: BaseChartPainter {
         super.initRect(size)
         
         width = Double(size.width)
+        // 与 Flutter 对齐：布局层面的右侧留白只使用基础计算，不叠加实时价格的 rightInset
         marginRight = ((width) / 5 - pointWidth) / scaleX
         
         // 计算主图和副图的高度分配
@@ -494,27 +496,33 @@ public class ChartPainter: BaseChartPainter {
     
     public override func drawRealTimePrice(_ canvas: CGContext, _ size: CGSize) {
         guard marginRight != 0, let datas = datas, !datas.isEmpty else { return }
-        
+        // 默认清空
+        ChartPainter.lastRealTimeLabelRect = .zero
+
         let point = datas.last!
+        // 实时价格文字（使用样式配置）
+        let rt = chartStyle.realTimePriceStyle
         let text = NSAttributedString(string: format(point.close), 
-                                    attributes: getTextStyle(chartColors.rightRealTimeTextColor))
-        let textPadding: Double = 5
+                                    attributes: getTextStyle(rt.labelTextColor))
+        let textPadding: Double = rt.labelTextPadding
         let y = mainRenderer?.getY(point.close) ?? 0
         
         let max = (abs(translateX) + marginRight - abs(getMinTranslateX()) + pointWidth) * scaleX
         var x = width - max
         if !isLine { x += pointWidth / 2 }
         
-        let dashWidth = chartStyle.dashWidth
-        let dashSpace = chartStyle.dashSpace
+        // 虚线参数（来自样式配置）
+        var dashWidth = rt.dashWidth
+        var dashSpace = rt.dashSpace
+        if dashSpace < 1.0 { dashSpace = 1.0 }
         var startX: Double = 0
         let space = dashSpace + dashWidth
         
         if text.size().width < max {
             if chartStyle.isShowDashLine {
-                // 绘制虚线
+                // 绘制虚线（使用样式颜色）
                 while startX < (max - text.size().width - textPadding - textPadding) {
-                    canvas.setStrokeColor(chartColors.realTimeLineColor.cgColor)
+                    canvas.setStrokeColor(rt.lineColor.cgColor)
                     canvas.setLineWidth(1.0)
                     canvas.move(to: CGPoint(x: x + startX, y: y))
                     canvas.addLine(to: CGPoint(x: x + startX + dashWidth, y: y))
@@ -523,20 +531,29 @@ public class ChartPainter: BaseChartPainter {
                 }
             }
             
-            // 绘制价格背景
-            let left = width - text.size().width
-            let top = y - text.size().height / 2
-            let radius: Double = 2
+            // 绘制价格背景（使用样式配置）
+            // 纠正越界：背景矩形右对齐在屏幕内
+            let rectWidth = text.size().width + 2 * textPadding
+            var left = width - rectWidth
+            if left < 0 { left = 0 }
+            let top = y - text.size().height / 2 - rt.labelExtraHeight / 2
+            let radius: Double = rt.labelCornerRadius
             
-            let rect = CGRect(x: left - textPadding, y: top, 
-                             width: text.size().width + 2 * textPadding, height: text.size().height)
+            let rect = CGRect(x: left, y: top, 
+                             width: rectWidth, height: text.size().height + rt.labelExtraHeight)
             let roundedRect = UIBezierPath(roundedRect: rect, cornerRadius: CGFloat(radius))
+            ChartPainter.lastRealTimeLabelRect = rect
             
-            canvas.setFillColor(chartColors.realTimeBgColor.cgColor)
+            canvas.setFillColor(rt.labelBgColor.cgColor)
             canvas.addPath(roundedRect.cgPath)
             canvas.fillPath()
+            canvas.setStrokeColor(rt.labelBorderColor.cgColor)
+            canvas.setLineWidth(1.0)
+            canvas.addPath(roundedRect.cgPath)
+            canvas.strokePath()
             
-            text.draw(at: CGPoint(x: left, y: top))
+            let textY = Double(rect.midY) - text.size().height / 2
+            text.draw(at: CGPoint(x: left + textPadding, y: textY))
         } else {
             // 价格显示在图表上
             startX = 0
@@ -550,9 +567,9 @@ public class ChartPainter: BaseChartPainter {
             }
             
             if chartStyle.isShowDashLine {
-                // 绘制长虚线
+                // 绘制长虚线（使用样式颜色）
                 while startX < width {
-                    canvas.setStrokeColor(chartColors.realTimeLongLineColor.cgColor)
+                    canvas.setStrokeColor(rt.lineColor.cgColor)
                     canvas.setLineWidth(1.0)
                     canvas.move(to: CGPoint(x: startX, y: adjustedY))
                     canvas.addLine(to: CGPoint(x: startX + dashWidth, y: adjustedY))
@@ -561,29 +578,31 @@ public class ChartPainter: BaseChartPainter {
                 }
             }
             
-            // 绘制带三角形的价格标签
-            let padding: Double = 3
-            let triangleHeight: Double = 8
-            let triangleWidth: Double = 5
+            // 绘制带三角形的价格标签（使用样式配置）
+            let padding: Double = Swift.max(3.0, textPadding / 2)
+            let triangleHeight: Double = rt.triangleHeight
+            let triangleWidth: Double = rt.triangleWidth
             
             let left = width - text.size().width * 2.5
-            let top = adjustedY - text.size().height / 2 - padding
+            let top = adjustedY - text.size().height / 2 - padding - rt.labelExtraHeight / 2
             let right = left + text.size().width + padding * 2 + triangleWidth + padding
-            let bottom = top + text.size().height + padding * 2
+            let bottom = top + text.size().height + padding * 2 + rt.labelExtraHeight
             let rectRadius = (bottom - top) / 2
             
             let rect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
             let roundedRect = UIBezierPath(roundedRect: rect, cornerRadius: CGFloat(rectRadius))
+            ChartPainter.lastRealTimeLabelRect = rect
             
-            canvas.setFillColor(chartColors.realTimeBgColor.cgColor)
-            canvas.setStrokeColor(chartColors.realTimeTextBorderColor.cgColor)
+            canvas.setFillColor(rt.labelBgColor.cgColor)
+            canvas.setStrokeColor(rt.labelBorderColor.cgColor)
             canvas.setLineWidth(1.0)
             canvas.addPath(roundedRect.cgPath)
             canvas.fillPath()
             canvas.addPath(roundedRect.cgPath)
             canvas.strokePath()
             
-            text.draw(at: CGPoint(x: left + padding, y: adjustedY - text.size().height / 2))
+            let textY = Double(rect.midY) - text.size().height / 2
+            text.draw(at: CGPoint(x: left + padding, y: textY))
             
             // 绘制三角形
             let trianglePath = CGMutablePath()
@@ -594,7 +613,7 @@ public class ChartPainter: BaseChartPainter {
             trianglePath.addLine(to: CGPoint(x: dx, y: dy + triangleHeight))
             trianglePath.closeSubpath()
             
-            canvas.setFillColor(chartColors.realTimeTextColor.cgColor)
+            canvas.setFillColor(rt.labelBorderColor.cgColor)
             canvas.addPath(trianglePath)
             canvas.fillPath()
         }

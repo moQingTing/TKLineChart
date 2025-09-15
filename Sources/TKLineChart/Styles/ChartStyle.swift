@@ -236,6 +236,28 @@ public class ChartStyle {
     // 例如：0.15 表示每个副图最多占据15%的高度
     public var singleSecondaryMaxHeightRatio: Double = 0.15
     
+    // 实时价格样式
+    public struct RealTimePriceStyle {
+        public var lineColor: UIColor = UIColor.black
+        public var dashWidth: Double = 3.0
+        public var dashSpace: Double = 1.4
+        public var labelTextColor: UIColor = UIColor.black
+        public var labelBgColor: UIColor = UIColor.white
+        public var labelBorderColor: UIColor = UIColor.black
+        public var labelCornerRadius: Double = 2.0
+        public var labelTextPadding: Double = 6.0
+        public var labelExtraHeight: Double = 8.0
+        public var triangleWidth: Double = 5.0
+        public var triangleHeight: Double = 8.0
+        // 右侧内边距（增大蜡烛与实时价格的间距）
+        public var rightInset: Double = 35.0
+        // 右侧实时价格点击热区（像素），用于点击后回到最右
+        public var tapHotZoneWidth: Double = 80.0
+        
+        public init() {}
+    }
+    public var realTimePriceStyle: RealTimePriceStyle = RealTimePriceStyle()
+    
     public init() {}
 }
 
