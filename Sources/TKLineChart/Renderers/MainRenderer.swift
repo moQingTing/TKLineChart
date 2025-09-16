@@ -17,15 +17,24 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         self.chartColors = chartColors
         self.chartStyle = chartStyle
         
-        super.init(chartRect: chartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding)
+        // 为指标参数预留上padding空间，去掉底部留白
+        let textPadding = chartStyle.defaultTextSize + 4.0
+        let adjustedChartRect = CGRect(
+            x: chartRect.minX,
+            y: chartRect.minY + CGFloat(textPadding),
+            width: chartRect.width,
+            height: max(0, chartRect.height - CGFloat(textPadding))
+        )
+        
+        super.init(chartRect: adjustedChartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding)
         
         self.candleWidth = chartStyle.candleWidth
         self.candleLineWidth = chartStyle.candleLineWidth
         
         // 调整Y轴范围，增加内容边距
         let diff = maxValue - minValue
-        let newScaleY = (Double(chartRect.height) - contentPadding) / diff
-        let newDiff = Double(chartRect.height) / newScaleY
+        let newScaleY = (Double(adjustedChartRect.height) - contentPadding) / diff
+        let newDiff = Double(adjustedChartRect.height) / newScaleY
         let value = (newDiff - diff) / 2
         
         if newDiff > diff {
@@ -87,9 +96,14 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         }
         
         let textSize = combinedText.size()
-        // 修复位置计算：在图表内部，贴着顶部网格线显示指标参数
-        let y = Double(chartRect.minY) + 2
-        combinedText.draw(at: CGPoint(x: x, y: y))
+        
+        // 指标参数显示在预留的padding区域中
+        let textPadding = chartStyle.defaultTextSize + 4.0
+        
+        // 顶部指标参数：显示在上padding区域
+        let topY = Double(chartRect.minY) - textPadding + 2
+        combinedText.draw(at: CGPoint(x: x, y: topY))
+        
     }
     
     public override func drawChart(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity, 
@@ -286,25 +300,52 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     }
     
     public override func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int) {
+        // 计算包含上padding的完整边框区域（去掉底部留白）
+        let textPadding = chartStyle.defaultTextSize + 4.0
+        let fullRect = CGRect(
+            x: chartRect.minX,
+            y: chartRect.minY - CGFloat(textPadding),
+            width: chartRect.width,
+            height: chartRect.height + CGFloat(textPadding)
+        )
+        
         let rowSpace = Double(chartRect.height) / Double(gridRows)
         
         canvas.setStrokeColor(chartColors.gridColor.cgColor)
         canvas.setLineWidth(CGFloat(chartStyle.gridStrokeWidth))
         
-        // 绘制水平网格线
-        for i in 0...gridRows {
+        // 绘制水平网格线（只在图表内容区域内，从第二行开始，跳过第一行）
+        for i in 1...gridRows {
             let y = Double(chartRect.minY) + Double(i) * rowSpace
             canvas.move(to: CGPoint(x: chartRect.minX, y: y))
             canvas.addLine(to: CGPoint(x: chartRect.maxX, y: y))
         }
         
-        // 绘制垂直网格线
+        // 绘制垂直网格线（只在图表内容区域内）
         let columnSpace = Double(chartRect.width) / Double(gridColumns)
         for i in 0...gridColumns {
             let x = Double(chartRect.minX) + Double(i) * columnSpace
             canvas.move(to: CGPoint(x: x, y: chartRect.minY))
             canvas.addLine(to: CGPoint(x: x, y: chartRect.maxY))
         }
+        
+        // 绘制边框线（包含整个区域，包括padding）
+        // 上线：在指标参数文字上方
+        let topBorderY = Double(fullRect.minY)
+        canvas.move(to: CGPoint(x: fullRect.minX, y: topBorderY))
+        canvas.addLine(to: CGPoint(x: fullRect.maxX, y: topBorderY))
+        
+        // 下线：在底部留白区域下方
+        let bottomBorderY = Double(fullRect.maxY)
+        canvas.move(to: CGPoint(x: fullRect.minX, y: bottomBorderY))
+        canvas.addLine(to: CGPoint(x: fullRect.maxX, y: bottomBorderY))
+        
+        // 左右边框线
+        canvas.move(to: CGPoint(x: fullRect.minX, y: topBorderY))
+        canvas.addLine(to: CGPoint(x: fullRect.minX, y: bottomBorderY))
+        
+        canvas.move(to: CGPoint(x: fullRect.maxX, y: topBorderY))
+        canvas.addLine(to: CGPoint(x: fullRect.maxX, y: bottomBorderY))
         
         canvas.strokePath()
     }
