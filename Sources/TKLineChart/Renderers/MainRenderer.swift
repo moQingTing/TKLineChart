@@ -178,6 +178,22 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         canvas.strokePath()
     }
     
+    // 带颜色参数的drawLine方法，用于绘制MA、EMA等指标线
+    public override func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor) {
+        let lastY = getY(lastPrice)
+        let curY = getY(curPrice)
+        
+        // 限制Y坐标在图表范围内，防止超出指标参数区域
+        let clampedLastY = max(Double(chartRect.minY), min(Double(chartRect.maxY), lastY))
+        let clampedCurY = max(Double(chartRect.minY), min(Double(chartRect.maxY), curY))
+        
+        canvas.setStrokeColor(color.cgColor)
+        canvas.setLineWidth(CGFloat(chartStyle.lineStrokeWidth))
+        canvas.move(to: CGPoint(x: lastX, y: clampedLastY))
+        canvas.addLine(to: CGPoint(x: curX, y: clampedCurY))
+        canvas.strokePath()
+    }
+    
     private func drawMaLine(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
                            canvas: CGContext, lastX: Double, curX: Double, periods: [Int]) {
         let maColors = ChartConfiguration.shared.movingAverageStyle.maColors
@@ -311,8 +327,10 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         
         let rowSpace = Double(chartRect.height) / Double(gridRows)
         
-        canvas.setStrokeColor(chartColors.gridColor.cgColor)
-        canvas.setLineWidth(CGFloat(chartStyle.gridStrokeWidth))
+        // 使用 ChartConfiguration 中的网格配置
+        let config = ChartConfiguration.shared
+        canvas.setStrokeColor(config.backgroundStyle.gridColor.cgColor)
+        canvas.setLineWidth(CGFloat(config.backgroundStyle.gridLineWidth))
         
         // 绘制水平网格线（只在图表内容区域内，从第二行开始，跳过第一行）
         for i in 1...gridRows {
@@ -321,12 +339,12 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             canvas.addLine(to: CGPoint(x: chartRect.maxX, y: y))
         }
         
-        // 绘制垂直网格线（只在图表内容区域内）
+        // 绘制垂直网格线（延伸到整个区域，包括上padding）
         let columnSpace = Double(chartRect.width) / Double(gridColumns)
         for i in 0...gridColumns {
             let x = Double(chartRect.minX) + Double(i) * columnSpace
-            canvas.move(to: CGPoint(x: x, y: chartRect.minY))
-            canvas.addLine(to: CGPoint(x: x, y: chartRect.maxY))
+            canvas.move(to: CGPoint(x: x, y: Double(fullRect.minY)))
+            canvas.addLine(to: CGPoint(x: x, y: Double(fullRect.maxY)))
         }
         
         // 绘制边框线（包含整个区域，包括padding）

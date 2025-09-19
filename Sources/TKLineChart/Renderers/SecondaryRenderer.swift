@@ -255,8 +255,10 @@ canvas: CGContext, lastX: Double, curX: Double) {
     public override func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int) {
         let rowSpace = Double(chartRect.height) / Double(gridRows)
         
-        canvas.setStrokeColor(chartColors.gridColor.cgColor)
-        canvas.setLineWidth(CGFloat(chartStyle.gridStrokeWidth))
+        // 使用 ChartConfiguration 中的网格配置
+        let config = ChartConfiguration.shared
+        canvas.setStrokeColor(config.backgroundStyle.gridColor.cgColor)
+        canvas.setLineWidth(CGFloat(config.backgroundStyle.gridLineWidth))
         
         // 绘制水平网格线（只绘制顶部和底部，去掉中间线）
         // 顶部网格线
