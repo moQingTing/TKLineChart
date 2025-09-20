@@ -1,6 +1,8 @@
 ## TKLineChart
 
-一个纯 Swift 的专业 K 线图/深度图组件，支持主图与多副图指标、手势交互与实时更新。本文档为“引用指南”，帮助你快速集成到项目中。
+一个纯 Swift 的专业 K 线图/深度图组件，支持主图与多副图指标、手势交互与实时更新。本文档为"引用指南"，帮助你快速集成到项目中。
+
+> 🙏 **致谢**: 本项目参考了 [flutter_k_chart](https://github.com/gwhcn/flutter_k_chart) 的设计思路与实现方案，感谢原作者 [@gwhcn](https://github.com/gwhcn) 的贡献。
 
 ### 兼容性
 - **iOS**: 13.0+
@@ -135,5 +137,19 @@ chartView.chartColors = colors
 - 欢迎提 Issue/PR，一起完善指标、性能和动画。
 - 如果这个库对你有帮助，欢迎点 Star 支持！
 
+## 请喝咖啡 ☕️
+
+如果这个项目对你有帮助，欢迎请我喝杯咖啡，支持我继续开发更多好用的组件！
+
+<div align="center">
+  <img src="images/0e5e143c1524158b418eecc882c02878.jpg" alt="微信赞赏" width="200" />
+  <img src="images/aaa625d4a14d2439b20af36c96ac998f.jpg" alt="支付宝赞赏" width="200" />
+</div>
+
+🙏 **感谢支持！**
+
 ## 许可证
 本项目采用 MIT License。
+
+## 致谢
+感谢 [flutter_k_chart](https://github.com/gwhcn/flutter_k_chart) 项目提供的设计思路与实现参考。
