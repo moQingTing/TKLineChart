@@ -11,7 +11,7 @@
 在 Xcode 中选择 File → Add Packages…，输入仓库地址并添加：
 
 ```
-https://github.com/your-username/TKLineChart.git
+https://github.com/moQingTing/TKLineChart
 ```
 
 添加完成后，在目标的 Frameworks, Libraries, and Embedded Content 中确认已包含 `TKLineChart`。
