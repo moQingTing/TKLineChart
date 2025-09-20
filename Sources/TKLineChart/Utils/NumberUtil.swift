@@ -1,13 +1,8 @@
 import Foundation
 
 public class NumberUtil {
-    // 小数位由外部配置 ChartConfiguration.shared.numberFractionDigits 决定
-    public static var fractionDigits: Int {
-        get { return ChartConfiguration.shared.numberFractionDigits }
-        set { ChartConfiguration.shared.numberFractionDigits = newValue }
-    }
     
-    public static func volFormat(_ n: Double) -> String {
+    public static func volFormat(_ n: Double,_ fractionDigits:Int) -> String {
         if abs(n) >= 1_000 && abs(n) < 1_000_000 {
             let d = n / 1_000
             return trimTrailingZeros(formatWithGrouping(d, fractionDigits: fractionDigits)) + "k"
@@ -24,7 +19,7 @@ public class NumberUtil {
         return trimTrailingZeros(formatWithGrouping(n, fractionDigits: fractionDigits))
     }
     
-    public static func format(_ price: Double) -> String {
+    public static func format(_ price: Double,_ fractionDigits:Int) -> String {
         return formatWithGrouping(price, fractionDigits: fractionDigits)
     }
     
@@ -37,8 +32,8 @@ public class NumberUtil {
     }
 
     // 通用缩写：1000->1k, 1_000_000->1M, 1_000_000_000->1B, 1_000_000_000_000->1T
-    public static func abbreviate(_ n: Double) -> String {
-        return volFormat(n)
+    public static func abbreviate(_ n: Double,_ fractionDigits:Int) -> String {
+        return volFormat(n,fractionDigits)
     }
 
     private static func trimTrailingZeros(_ s: String) -> String {

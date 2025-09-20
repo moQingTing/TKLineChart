@@ -1,10 +1,87 @@
 import UIKit
 
 // MARK: - 图表配置管理器
+/// 图表配置类，支持完全自定义所有样式参数
+/// 使用方式：
+/// let config = ChartConfiguration()
+/// 或使用预设主题：
+/// let config = ChartConfiguration(theme: .binance)
 public class ChartConfiguration {
-    nonisolated(unsafe) public static let shared = ChartConfiguration()
     
-    private init() {}
+    /// 默认初始化方法
+    public init() {
+        // 初始化所有存储属性为默认值
+        self.candleStyle = CandleStyle()
+        self.movingAverageStyle = MovingAverageStyle()
+        self.bollingerBandsStyle = BollingerBandsStyle()
+        self.macdStyle = MACDStyle()
+        self.kdjStyle = KDJStyle()
+        self.rsiStyle = RSIStyle()
+        self.volumeStyle = VolumeStyle()
+        self.obvStyle = OBVStyle()
+        self.williamsRStyle = WilliamsRStyle()
+        self.backgroundStyle = BackgroundStyle()
+        self.textStyle = TextStyle()
+        self.realTimeStyle = RealTimeStyle()
+        self.infoPanelTexts = ChartConfiguration.infoPanelPreset(.zhHans)
+        self.infoPanelStyle = InfoPanelStyle()
+        self.emaStyle = EMAStyle()
+        self.numberFractionDigits = 2
+    }
+    
+    /// 完全自定义初始化方法
+    /// - Parameters:
+    ///   - candleStyle: 蜡烛图样式
+    ///   - movingAverageStyle: 移动平均线样式
+    ///   - bollingerBandsStyle: 布林带样式
+    ///   - macdStyle: MACD样式
+    ///   - kdjStyle: KDJ样式
+    ///   - rsiStyle: RSI样式
+    ///   - volumeStyle: 成交量样式
+    ///   - obvStyle: OBV样式
+    ///   - williamsRStyle: Williams %R样式
+    ///   - backgroundStyle: 背景样式
+    ///   - textStyle: 文字样式
+    ///   - realTimeStyle: 实时数据样式
+    ///   - infoPanelTexts: 信息面板文本
+    ///   - infoPanelStyle: 信息面板样式
+    ///   - emaStyle: EMA样式
+    ///   - numberFractionDigits: 数字小数位数
+    public init(
+        candleStyle: CandleStyle = CandleStyle(),
+        movingAverageStyle: MovingAverageStyle = MovingAverageStyle(),
+        bollingerBandsStyle: BollingerBandsStyle = BollingerBandsStyle(),
+        macdStyle: MACDStyle = MACDStyle(),
+        kdjStyle: KDJStyle = KDJStyle(),
+        rsiStyle: RSIStyle = RSIStyle(),
+        volumeStyle: VolumeStyle = VolumeStyle(),
+        obvStyle: OBVStyle = OBVStyle(),
+        williamsRStyle: WilliamsRStyle = WilliamsRStyle(),
+        backgroundStyle: BackgroundStyle = BackgroundStyle(),
+        textStyle: TextStyle = TextStyle(),
+        realTimeStyle: RealTimeStyle = RealTimeStyle(),
+        infoPanelTexts: InfoPanelTexts = ChartConfiguration.infoPanelPreset(.zhHans),
+        infoPanelStyle: InfoPanelStyle = InfoPanelStyle(),
+        emaStyle: EMAStyle = EMAStyle(),
+        numberFractionDigits: Int = 2
+    ) {
+        self.candleStyle = candleStyle
+        self.movingAverageStyle = movingAverageStyle
+        self.bollingerBandsStyle = bollingerBandsStyle
+        self.macdStyle = macdStyle
+        self.kdjStyle = kdjStyle
+        self.rsiStyle = rsiStyle
+        self.volumeStyle = volumeStyle
+        self.obvStyle = obvStyle
+        self.williamsRStyle = williamsRStyle
+        self.backgroundStyle = backgroundStyle
+        self.textStyle = textStyle
+        self.realTimeStyle = realTimeStyle
+        self.infoPanelTexts = infoPanelTexts
+        self.infoPanelStyle = infoPanelStyle
+        self.emaStyle = emaStyle
+        self.numberFractionDigits = numberFractionDigits
+    }
     
     // MARK: - 蜡烛样式配置
     public struct CandleStyle {
@@ -14,12 +91,14 @@ public class ChartConfiguration {
         public var lineWidth: Double = 0.8
         // 是否实心蜡烛
         public var isSolid: Bool = true
-        // 上涨颜色（红涨）
-        public var upColor: UIColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0)
-        // 下跌颜色（绿跌）
-        public var downColor: UIColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)
+        // 上涨颜色（绿涨）
+        public var upColor: UIColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587
+        // 下跌颜色（红跌）
+        public var downColor: UIColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E
         // 影线颜色
         public var shadowColor: UIColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+        
+        public init() {}
     }
     
     // MARK: - 移动平均线配置
@@ -43,6 +122,8 @@ public class ChartConfiguration {
                 60: ma30Color
             ]
         }
+        
+        public init() {}
     }
 
     // MARK: - 指数移动平均线配置（独立于 MA）
@@ -58,6 +139,8 @@ public class ChartConfiguration {
             60: UIColor(red: 0.35, green: 0.35, blue: 0.35, alpha: 1.0)   // 灰
         ]
         public var lineWidth: Double = 1.0
+        
+        public init() {}
     }
     
     // MARK: - 布林带配置
@@ -72,6 +155,8 @@ public class ChartConfiguration {
         public var lineWidth: Double = 1.0
         // 填充颜色透明度
         public var fillAlpha: CGFloat = 0.1
+        
+        public init() {}
     }
     
     // MARK: - MACD配置
@@ -81,13 +166,15 @@ public class ChartConfiguration {
         // DEA线颜色
         public var deaColor: UIColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
         // MACD柱状图颜色（正值）
-        public var positiveColor: UIColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0) // 红色
+        public var positiveColor: UIColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色
         // MACD柱状图颜色（负值）
-        public var negativeColor: UIColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0) // 绿色
+        public var negativeColor: UIColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色
         // 线宽
         public var lineWidth: Double = 1.0
         // 柱状图宽度
         public var barWidth: Double = 6.5
+        
+        public init() {}
     }
     
     // MARK: - KDJ配置
@@ -100,6 +187,8 @@ public class ChartConfiguration {
         public var jColor: UIColor = UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // 粉色
         // 线宽
         public var lineWidth: Double = 1.0
+        
+        public init() {}
     }
     
     // MARK: - RSI配置
@@ -118,14 +207,16 @@ public class ChartConfiguration {
             return [6: rsi6Color, 12: rsi12Color, 24: rsi24Color]
         }
         public var rsiDefaultPeriod: Int = 14
+        
+        public init() {}
     }
     
     // MARK: - 成交量配置
     public struct VolumeStyle {
         // 上涨成交量颜色
-        public var upColor: UIColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0) // 红色
+        public var upColor: UIColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色
         // 下跌成交量颜色
-        public var downColor: UIColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0) // 绿色
+        public var downColor: UIColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色
         // 柱状图宽度
         public var barWidth: Double = 6.5
         // 成交量MA线颜色
@@ -133,6 +224,8 @@ public class ChartConfiguration {
         public var ma10Color: UIColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
         // 参数化周期颜色映射
         public var maColors: [Int: UIColor] { return [5: ma5Color, 10: ma10Color] }
+        
+        public init() {}
     }
     
     // MARK: - OBV配置
@@ -141,6 +234,8 @@ public class ChartConfiguration {
         public var lineColor: UIColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         // 线宽
         public var lineWidth: Double = 1.0
+        
+        public init() {}
     }
     
     // MARK: - Williams %R配置
@@ -152,6 +247,8 @@ public class ChartConfiguration {
         // 超买超卖线颜色
         public var overboughtColor: UIColor = UIColor.red.withAlphaComponent(0.3)
         public var oversoldColor: UIColor = UIColor.green.withAlphaComponent(0.3)
+        
+        public init() {}
     }
     
     // MARK: - 背景和网格配置
@@ -166,6 +263,8 @@ public class ChartConfiguration {
         public var gridRows: Int = 2
         // 网格列数
         public var gridColumns: Int = 3
+        
+        public init() {}
     }
     
     // MARK: - 文字配置
@@ -178,6 +277,8 @@ public class ChartConfiguration {
         public var priceTextColor: UIColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
         // 时间文字颜色
         public var timeTextColor: UIColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+        
+        public init() {}
     }
 
     // MARK: - 信息面板本地化文本
@@ -191,6 +292,18 @@ public class ChartConfiguration {
         public var amplitude: String = "振幅"
         public var volume: String = "量"
         public var amount: String = "额"
+        
+        public init(time:String, open:String, high:String, low:String, close:String, change:String, amplitude:String, volume:String, amount:String) {
+            self.time = time
+            self.open = open
+            self.high = high
+            self.low = low
+            self.close = close
+            self.change = change
+            self.amplitude = amplitude
+            self.volume = volume
+            self.amount = amount
+        }
     }
 
     // MARK: - 信息面板样式
@@ -224,26 +337,43 @@ public class ChartConfiguration {
         public var priceBoxBorderColor: UIColor = UIColor(red: 0.424, green: 0.478, blue: 0.525, alpha: 1.0)
         // 实时价格文字颜色
         public var priceTextColor: UIColor = UIColor.black
+        
+        public init() {}
     }
     
-    // MARK: - 配置实例
-    public var candleStyle = CandleStyle()
-    public var movingAverageStyle = MovingAverageStyle()
-    public var bollingerBandsStyle = BollingerBandsStyle()
-    public var macdStyle = MACDStyle()
-    public var kdjStyle = KDJStyle()
-    public var rsiStyle = RSIStyle()
-    public var volumeStyle = VolumeStyle()
-    public var obvStyle = OBVStyle()
-    public var williamsRStyle = WilliamsRStyle()
-    public var backgroundStyle = BackgroundStyle()
-    public var textStyle = TextStyle()
-    public var realTimeStyle = RealTimeStyle()
-    public var infoPanelTexts = InfoPanelTexts()
-    public var infoPanelStyle = InfoPanelStyle()
-    public var emaStyle = EMAStyle()
-    // 数字格式：全局小数位（价格/指标等），可外部配置
-    public var numberFractionDigits: Int = 2
+    // MARK: - 配置实例（所有属性均可外部修改）
+    /// 蜡烛图样式配置
+    public var candleStyle: CandleStyle
+    /// 移动平均线样式配置
+    public var movingAverageStyle: MovingAverageStyle
+    /// 布林带样式配置
+    public var bollingerBandsStyle: BollingerBandsStyle
+    /// MACD样式配置
+    public var macdStyle: MACDStyle
+    /// KDJ样式配置
+    public var kdjStyle: KDJStyle
+    /// RSI样式配置
+    public var rsiStyle: RSIStyle
+    /// 成交量样式配置
+    public var volumeStyle: VolumeStyle
+    /// OBV样式配置
+    public var obvStyle: OBVStyle
+    /// Williams %R样式配置
+    public var williamsRStyle: WilliamsRStyle
+    /// 背景和网格样式配置
+    public var backgroundStyle: BackgroundStyle
+    /// 文字样式配置
+    public var textStyle: TextStyle
+    /// 实时数据样式配置
+    public var realTimeStyle: RealTimeStyle
+    /// 信息面板文本配置
+    public var infoPanelTexts: InfoPanelTexts
+    /// 信息面板样式配置
+    public var infoPanelStyle: InfoPanelStyle
+    /// EMA样式配置
+    public var emaStyle: EMAStyle
+    /// 数字格式：全局小数位（价格/指标等），可外部配置
+    public var numberFractionDigits: Int
 
     // MARK: - 信息面板多语言预设
     public enum InfoPanelLocalePreset {
@@ -257,10 +387,7 @@ public class ChartConfiguration {
     public static func infoPanelPreset(_ preset: InfoPanelLocalePreset) -> InfoPanelTexts {
         switch preset {
         case .zhHans:
-            return InfoPanelTexts(
-                time: "时间", open: "开", high: "高", low: "低", close: "收",
-                change: "涨幅", amplitude: "振幅", volume: "量", amount: "额"
-            )
+            return InfoPanelTexts(time: "时间", open: "开", high: "高", low: "低", close: "收", change: "涨幅", amplitude: "振幅", volume: "量", amount: "额")
         case .zhHant:
             return InfoPanelTexts(
                 time: "時間", open: "開", high: "高", low: "低", close: "收",
@@ -289,35 +416,8 @@ public class ChartConfiguration {
         self.infoPanelTexts = ChartConfiguration.infoPanelPreset(preset)
     }
     
-    // MARK: - 预设主题
-    public enum Theme {
-        case light
-        case dark
-        case binance
-        case custom
-    }
     
-    public var currentTheme: Theme = .binance {
-        didSet {
-            applyTheme(currentTheme)
-        }
-    }
-    
-    // MARK: - 应用主题
-    private func applyTheme(_ theme: Theme) {
-        switch theme {
-        case .light:
-            applyLightTheme()
-        case .dark:
-            applyDarkTheme()
-        case .binance:
-            applyBinanceTheme()
-        case .custom:
-            break // 保持当前配置
-        }
-    }
-    
-    private func applyLightTheme() {
+    public func applyLightTheme() {
         backgroundStyle.backgroundColor = UIColor.white
         backgroundStyle.gridColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
         textStyle.textColor = UIColor.black
@@ -325,7 +425,7 @@ public class ChartConfiguration {
         textStyle.timeTextColor = UIColor.black
     }
     
-    private func applyDarkTheme() {
+    public func applyDarkTheme() {
         backgroundStyle.backgroundColor = UIColor(red: 0.075, green: 0.090, blue: 0.137, alpha: 1.0)
         backgroundStyle.gridColor = UIColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 1.0)
         textStyle.textColor = UIColor.white
@@ -333,10 +433,10 @@ public class ChartConfiguration {
         textStyle.timeTextColor = UIColor.white
     }
     
-    private func applyBinanceTheme() {
+    public func applyBinanceTheme() {
         // 应用币安主题（基于图片分析）
-        candleStyle.upColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0) // 红色上涨
-        candleStyle.downColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0) // 绿色下跌
+        candleStyle.upColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色上涨
+        candleStyle.downColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色下跌
         candleStyle.isSolid = true // 实心蜡烛
         
         movingAverageStyle.ma5Color = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
@@ -345,8 +445,8 @@ public class ChartConfiguration {
         
         macdStyle.difColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         macdStyle.deaColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
-        macdStyle.positiveColor = UIColor(red: 0.0, green: 0.8, blue: 0.0, alpha: 1.0) // 绿色
-        macdStyle.negativeColor = UIColor(red: 0.8, green: 0.0, blue: 0.0, alpha: 1.0) // 红色
+        macdStyle.positiveColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色
+        macdStyle.negativeColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色
         
         kdjStyle.kColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
         kdjStyle.dColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
@@ -359,8 +459,8 @@ public class ChartConfiguration {
         obvStyle.lineColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         williamsRStyle.lineColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         
-        volumeStyle.upColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0) // 红色
-        volumeStyle.downColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0) // 绿色
+        volumeStyle.upColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色
+        volumeStyle.downColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色
         volumeStyle.ma5Color = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         volumeStyle.ma10Color = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
         
@@ -371,20 +471,35 @@ public class ChartConfiguration {
         textStyle.timeTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
     }
     
-    // MARK: - 配置保存和加载
-    public func saveConfiguration() {
-        // 这里可以实现配置的持久化保存
-        // 可以使用UserDefaults、Core Data或其他存储方式
+
+    
+    // MARK: - 便捷配置方法
+    /// 快速设置蜡烛图颜色
+    /// - Parameters:
+    ///   - upColor: 上涨颜色
+    ///   - downColor: 下跌颜色
+    public func setCandleColors(upColor: UIColor, downColor: UIColor) {
+        candleStyle.upColor = upColor
+        candleStyle.downColor = downColor
     }
     
-    public func loadConfiguration() {
-        // 这里可以实现配置的加载
-        // 从存储中恢复用户的自定义配置
+    /// 快速设置背景颜色
+    /// - Parameters:
+    ///   - backgroundColor: 背景颜色
+    ///   - gridColor: 网格颜色
+    public func setBackgroundColors(backgroundColor: UIColor, gridColor: UIColor) {
+        backgroundStyle.backgroundColor = backgroundColor
+        backgroundStyle.gridColor = gridColor
     }
     
-    // MARK: - 重置为默认配置
-    public func resetToDefault() {
-        currentTheme = .binance
-        applyTheme(.binance)
+    /// 快速设置文字颜色
+    /// - Parameters:
+    ///   - textColor: 文字颜色
+    ///   - priceTextColor: 价格文字颜色
+    ///   - timeTextColor: 时间文字颜色
+    public func setTextColors(textColor: UIColor, priceTextColor: UIColor, timeTextColor: UIColor) {
+        textStyle.textColor = textColor
+        textStyle.priceTextColor = priceTextColor
+        textStyle.timeTextColor = timeTextColor
     }
 }

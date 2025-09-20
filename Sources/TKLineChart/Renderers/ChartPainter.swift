@@ -13,13 +13,16 @@ public class ChartPainter: BaseChartPainter {
     private let secondaryStates: [SecondaryState]
     
     private let chartColors: ChartColors
+    private let chartConfiguration: ChartConfiguration
     
     private let selectY: Double
 
     public init(datas: [CompleteKLineEntity]?, scaleX: Double, scrollX: Double, isLongPress: Bool,
                 selectX: Double, selectY: Double, chartColors: ChartColors, chartStyle: ChartStyle,
-                secondaryStates: [SecondaryState], mainState: MainState, isLine: Bool) {
+                secondaryStates: [SecondaryState], mainState: MainState, isLine: Bool,
+                chartConfiguration: ChartConfiguration) {
         self.chartColors = chartColors
+        self.chartConfiguration = chartConfiguration
         self.secondaryStates = secondaryStates
         self.selectY = selectY
         
@@ -101,7 +104,8 @@ public class ChartPainter: BaseChartPainter {
     public override func initChartRenderer() {
         mainRenderer = MainRenderer(chartRect: mainRect, maxValue: mainMaxValue, minValue: mainMinValue,
                                   topPadding: chartStyle.topPadding, state: mainState, isLine: isLine,
-                                  chartStyle: chartStyle, chartColors: chartColors)
+                                  chartStyle: chartStyle, chartColors: chartColors,
+                                  chartConfiguration: chartConfiguration)
         
         // 副图（多个副图分别显示）
         for (secondaryState, rect) in secondaryRectMap {
@@ -111,7 +115,8 @@ public class ChartPainter: BaseChartPainter {
             secondaryChartRendererMap[secondaryState] = SecondaryRenderer(
                 chartRect: rect, maxValue: maxMinEntity.max, minValue: maxMinEntity.min,
                 topPadding: chartStyle.childPadding, secondaryState: secondaryState,
-                chartStyle: chartStyle, chartColors: chartColors)
+                chartStyle: chartStyle, chartColors: chartColors,
+                chartConfiguration: chartConfiguration)
         }
     }
     
@@ -216,7 +221,7 @@ public class ChartPainter: BaseChartPainter {
         
         // 选中价格文字颜色：白色
         let textColor = chartColors.selectedPriceTextColor
-        let text = NSAttributedString(string: format(selectedPrice), attributes: getTextStyle(textColor))
+        let text = NSAttributedString(string: format(selectedPrice, fractionDigits: chartConfiguration.numberFractionDigits), attributes: getTextStyle(textColor))
         let textHeight = text.size().height
         let textWidth = text.size().width
         
@@ -291,31 +296,31 @@ public class ChartPainter: BaseChartPainter {
 
     private func drawSelectedInfoPanel(_ canvas: CGContext, _ size: CGSize, _ point: CompleteKLineEntity, isLeft: Bool) {
         guard let mainRenderer = mainRenderer else { return }
-        let infoStyle = ChartConfiguration.shared.infoPanelStyle
+        let infoStyle = chartConfiguration.infoPanelStyle
         let padding: Double = 8
         let lineSpace: Double = 4
         // 面板字体统一黑色
         let valueColor = infoStyle.textColor
         let labelColor = infoStyle.textColor
-        let upColor = ChartConfiguration.shared.candleStyle.upColor
-        let downColor = ChartConfiguration.shared.candleStyle.downColor
+        let upColor = chartConfiguration.candleStyle.upColor
+        let downColor = chartConfiguration.candleStyle.downColor
 
         let change = point.close - point.open
         let changePct = point.open == 0 ? 0 : change / point.open * 100
         let amplitudePct = point.open == 0 ? 0 : (point.high - point.low) / point.open * 100
 
         let timeText = NSAttributedString(string: DataUtil.getDate(point.timestamp), attributes: getTextStyle(valueColor))
-        let openText = NSAttributedString(string: format(point.open), attributes: getTextStyle(valueColor))
-        let highText = NSAttributedString(string: format(point.high), attributes: getTextStyle(valueColor))
-        let lowText = NSAttributedString(string: format(point.low), attributes: getTextStyle(valueColor))
-        let closeText = NSAttributedString(string: format(point.close), attributes: getTextStyle(valueColor))
+        let openText = NSAttributedString(string: format(point.open, fractionDigits: chartConfiguration.numberFractionDigits), attributes: getTextStyle(valueColor))
+        let highText = NSAttributedString(string: format(point.high, fractionDigits: chartConfiguration.numberFractionDigits), attributes: getTextStyle(valueColor))
+        let lowText = NSAttributedString(string: format(point.low, fractionDigits: chartConfiguration.numberFractionDigits), attributes: getTextStyle(valueColor))
+        let closeText = NSAttributedString(string: format(point.close, fractionDigits: chartConfiguration.numberFractionDigits), attributes: getTextStyle(valueColor))
         let changeColor = change >= 0 ? upColor : downColor
-        let changeText = NSAttributedString(string: "\(format(change)) (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor))
+        let changeText = NSAttributedString(string: "\(format(change, fractionDigits: chartConfiguration.numberFractionDigits)) (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor))
         let amplitudeText = NSAttributedString(string: String(format: "%.2f%%", amplitudePct), attributes: getTextStyle(valueColor))
-        let volumeText = NSAttributedString(string: NumberUtil.abbreviate(point.volume), attributes: getTextStyle(valueColor))
-        let amountText = NSAttributedString(string: NumberUtil.abbreviate(point.amount), attributes: getTextStyle(valueColor))
+        let volumeText = NSAttributedString(string: NumberUtil.abbreviate(point.volume, chartConfiguration.numberFractionDigits), attributes: getTextStyle(valueColor))
+        let amountText = NSAttributedString(string: NumberUtil.abbreviate(point.amount, chartConfiguration.numberFractionDigits), attributes: getTextStyle(valueColor))
 
-        let i18n = ChartConfiguration.shared.infoPanelTexts
+        let i18n = chartConfiguration.infoPanelTexts
         let labels = [
             NSAttributedString(string: i18n.time, attributes: getTextStyle(labelColor)),
             NSAttributedString(string: i18n.open, attributes: getTextStyle(labelColor)),
@@ -413,11 +418,11 @@ public class ChartPainter: BaseChartPainter {
         let minY = mainRenderer?.getY(mainLowMinValue) ?? 0
         
         if minX < width / 2 {
-            let text = NSAttributedString(string: "── \(format(mainLowMinValue))", 
+            let text = NSAttributedString(string: "── \(format(mainLowMinValue, fractionDigits: chartConfiguration.numberFractionDigits))", 
                                         attributes: getTextStyle(chartColors.maxMinTextColor))
             text.draw(at: CGPoint(x: minX, y: minY - text.size().height / 2))
         } else {
-            let text = NSAttributedString(string: "\(format(mainLowMinValue)) ──", 
+            let text = NSAttributedString(string: "\(format(mainLowMinValue, fractionDigits: chartConfiguration.numberFractionDigits)) ──", 
                                         attributes: getTextStyle(chartColors.maxMinTextColor))
             text.draw(at: CGPoint(x: minX - text.size().width, y: minY - text.size().height / 2))
         }
@@ -426,11 +431,11 @@ public class ChartPainter: BaseChartPainter {
         let maxY = mainRenderer?.getY(mainHighMaxValue) ?? 0
         
         if maxX < width / 2 {
-            let text = NSAttributedString(string: "── \(format(mainHighMaxValue))", 
+            let text = NSAttributedString(string: "── \(format(mainHighMaxValue, fractionDigits: chartConfiguration.numberFractionDigits))", 
                                         attributes: getTextStyle(chartColors.maxMinTextColor))
             text.draw(at: CGPoint(x: maxX, y: maxY - text.size().height / 2))
         } else {
-            let text = NSAttributedString(string: "\(format(mainHighMaxValue)) ──", 
+            let text = NSAttributedString(string: "\(format(mainHighMaxValue, fractionDigits: chartConfiguration.numberFractionDigits)) ──", 
                                         attributes: getTextStyle(chartColors.maxMinTextColor))
             text.draw(at: CGPoint(x: maxX - text.size().width, y: maxY - text.size().height / 2))
         }
@@ -485,7 +490,7 @@ public class ChartPainter: BaseChartPainter {
         let point = datas.last!
         // 实时价格文字（使用样式配置）
         let rt = chartStyle.realTimePriceStyle
-        let text = NSAttributedString(string: format(point.close), 
+        let text = NSAttributedString(string: format(point.close, fractionDigits: chartConfiguration.numberFractionDigits), 
                                     attributes: getTextStyle(rt.labelTextColor))
         let textPadding: Double = rt.labelTextPadding
         let y = mainRenderer?.getY(point.close) ?? 0

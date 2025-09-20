@@ -43,6 +43,14 @@ public class TKLineChartView: UIView {
         }
     }
     
+    public var chartConfiguration: ChartConfiguration = ChartConfiguration() {
+        didSet {
+            if chartConfiguration !== oldValue {
+                setNeedsDisplay()
+            }
+        }
+    }
+    
     public var secondaryStates: [SecondaryState] = [] {
         didSet {
             setNeedsDisplay()
@@ -52,7 +60,7 @@ public class TKLineChartView: UIView {
     public var fractionDigits: Int = 2 {
         didSet {
             if fractionDigits != oldValue {
-                NumberUtil.fractionDigits = fractionDigits
+                chartConfiguration.numberFractionDigits = fractionDigits
                 setNeedsDisplay()
             }
         }
@@ -93,8 +101,6 @@ public class TKLineChartView: UIView {
     
     private func setupView() {
         backgroundColor = chartColors.bgColor
-        NumberUtil.fractionDigits = fractionDigits
-        
         setupGestureRecognizers()
     }
     
@@ -140,7 +146,8 @@ public class TKLineChartView: UIView {
             chartStyle: chartStyle,
             secondaryStates: secondaryStates,
             mainState: mainState,
-            isLine: isLine
+            isLine: isLine,
+            chartConfiguration: chartConfiguration
         )
         
         painter.initRect(rect.size)

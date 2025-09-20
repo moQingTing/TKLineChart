@@ -293,7 +293,7 @@ open class BaseChartPainter {
         ]
     }
     
-    public func format(_ n: Double) -> String {
-        return NumberUtil.format(n)
+    public func format(_ n: Double, fractionDigits: Int = 2) -> String {
+        return NumberUtil.format(n, fractionDigits)
     }
 }
