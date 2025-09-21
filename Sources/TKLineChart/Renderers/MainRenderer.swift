@@ -192,6 +192,8 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         
         canvas.setStrokeColor(color.cgColor)
         canvas.setLineWidth(CGFloat(chartStyle.lineStrokeWidth))
+        canvas.setLineCap(.round)  // 设置线条端点为圆形，避免裂缝
+        canvas.setLineJoin(.round) // 设置线条连接点为圆形，避免折角裂缝
         canvas.move(to: CGPoint(x: lastX, y: clampedLastY))
         canvas.addLine(to: CGPoint(x: curX, y: clampedCurY))
         canvas.strokePath()

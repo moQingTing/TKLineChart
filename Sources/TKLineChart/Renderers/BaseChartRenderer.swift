@@ -76,6 +76,8 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
         
         canvas.setStrokeColor(color.cgColor)
         canvas.setLineWidth(1.0)
+        canvas.setLineCap(.round)  // 设置线条端点为圆形，避免裂缝
+        canvas.setLineJoin(.round) // 设置线条连接点为圆形，避免折角裂缝
         canvas.move(to: CGPoint(x: lastX, y: lastY))
         canvas.addLine(to: CGPoint(x: curX, y: curY))
         canvas.strokePath()
