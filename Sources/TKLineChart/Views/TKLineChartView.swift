@@ -1,7 +1,7 @@
 import UIKit
 
 // MARK: - K线图主视图
-public class TKLineChartView: UIView {
+public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
     
     // MARK: - 属性
     public var datas: [CompleteKLineEntity]? {
@@ -109,6 +109,7 @@ public class TKLineChartView: UIView {
         // 拖拽手势
         panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         panGestureRecognizer.maximumNumberOfTouches = 1
+        panGestureRecognizer.delegate = self
         addGestureRecognizer(panGestureRecognizer)
         
         // 缩放手势
@@ -390,6 +391,7 @@ public class TKLineChartView: UIView {
     public func resetUserInteractionState() {
         userHasInteracted = false
     }
+    
 }
 
 // MARK: - 深度图视图
@@ -762,4 +764,5 @@ public class TKDepthChartView: UIView {
             setNeedsDisplay()
         }
     }
+
 }
