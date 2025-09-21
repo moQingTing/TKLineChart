@@ -237,19 +237,19 @@ public class ChartPainter: BaseChartPainter {
         let x: Double
         let isLeft: Bool
         
+        // 根据点击位置决定信息面板显示在左侧还是右侧
+        // 点击在左侧时，信息面板显示在右侧；点击在右侧时，信息面板显示在左侧
         if translateXtoX(getX(index)) < width / 2 {
-            isLeft = false
-            x = 1
-            // 绘制右侧信息框
-            drawInfoBox(canvas, x: x, y: y, width: textWidth + 2 * w1 + w2, height: 2 * r, isLeft: false)
-            text.draw(at: CGPoint(x: x + w1, y: y - textHeight / 2))
+            isLeft = false  // 点击在左侧，信息面板显示在右侧
         } else {
-            isLeft = true
-            x = width - textWidth - 1 - 2 * w1 - w2
-            // 绘制左侧信息框
-            drawInfoBox(canvas, x: x, y: y, width: textWidth + 2 * w1 + w2, height: 2 * r, isLeft: true)
-            text.draw(at: CGPoint(x: x + w1 + w2, y: y - textHeight / 2))
+            isLeft = true   // 点击在右侧，信息面板显示在左侧
         }
+        
+        // 价格标签始终显示在右侧,价格显示的横坐标位置
+        x = width - textWidth - 1 - 2 * w1 - w2
+        // 绘制价格右侧框
+        drawInfoBox(canvas, x: x, y: y, width: textWidth + 2 * w1 + w2, height: 2 * r, isLeft: false)
+        text.draw(at: CGPoint(x: x + w1 + w2/2, y: y - textHeight / 2))
         
         // 绘制日期信息（严格居中于竖线底部）
         let dateText = DataUtil.getDate(point.timestamp)
@@ -276,14 +276,8 @@ public class ChartPainter: BaseChartPainter {
         if dateY < bandTop { dateY = bandTop }
         if dateY + rectHeight > bandTop + chartStyle.bottomDateHigh { dateY = bandTop + chartStyle.bottomDateHigh - rectHeight }
         
-        let dateRect = CGRect(x: rectX, y: dateY, width: rectWidth, height: rectHeight)
-        
-        // let infoStyle = ChartConfiguration.shared.infoPanelStyle
-        // 底部时间气泡使用固定圆角 4，无边框
-        let dateRounded = UIBezierPath(roundedRect: dateRect, cornerRadius: 4)
-        canvas.setFillColor(chartColors.selectedPriceTextBgColor.cgColor)
-        canvas.addPath(dateRounded.cgPath)
-        canvas.fillPath()
+        // 复用 drawInfoBox 方法绘制时间背景框
+        drawInfoBox(canvas, x: rectX, y: dateY + rectHeight / 2, width: rectWidth, height: rectHeight, isLeft: false)
         
         // 文本在矩形内部水平、垂直居中
         let dateSize = dateTextAttr.size()
@@ -291,10 +285,10 @@ public class ChartPainter: BaseChartPainter {
         let dateTextY = dateY + (rectHeight - dateSize.height) / 2
         dateTextAttr.draw(at: CGPoint(x: dateTextX, y: dateTextY))
         // 选中信息面板
-        drawSelectedInfoPanel(canvas, size, point, isLeft: isLeft)
+        drawSelectedInfoPanel(canvas, size, point, isLeft: isLeft,priceTextX: x)
     }
 
-    private func drawSelectedInfoPanel(_ canvas: CGContext, _ size: CGSize, _ point: CompleteKLineEntity, isLeft: Bool) {
+    private func drawSelectedInfoPanel(_ canvas: CGContext, _ size: CGSize, _ point: CompleteKLineEntity, isLeft: Bool,priceTextX:Double) {
         guard let mainRenderer = mainRenderer else { return }
         let infoStyle = chartConfiguration.infoPanelStyle
         let padding: Double = 8
@@ -346,8 +340,17 @@ public class ChartPainter: BaseChartPainter {
 
         let leftX = Double(mainRenderer.chartRect.minX) + 8
         let rightX = Double(mainRenderer.chartRect.maxX) - rectW - 8
-        let panelX = isLeft ? rightX : leftX
+        var panelX = isLeft ? leftX : rightX
         let panelY = Double(mainRenderer.chartRect.minY) + 8
+        
+        // 当信息面板显示在右侧时，需要为价格标签预留空间
+        let priceLabelReservedWidth: Double = Double(mainRenderer.chartRect.maxX) - priceTextX
+        let maxRightX = Double(mainRenderer.chartRect.maxX) - priceLabelReservedWidth
+        
+        // 如果信息面板在右侧且会与价格标签重叠，则调整位置
+        if !isLeft && panelX < maxRightX {
+            panelX = maxRightX - rectW
+        }
 
         let rect = CGRect(x: panelX, y: panelY, width: rectW, height: rectH)
         let rounded = UIBezierPath(roundedRect: rect, cornerRadius: CGFloat(infoStyle.cornerRadius))
@@ -371,33 +374,17 @@ public class ChartPainter: BaseChartPainter {
     }
     
     private func drawInfoBox(_ canvas: CGContext, x: Double, y: Double, width: Double, height: Double, isLeft: Bool) {
-        let path = CGMutablePath()
-        let w1: Double = 5
-        let w2: Double = 3
         let r = height / 2
-        
-        if isLeft {
-            path.move(to: CGPoint(x: x, y: y))
-            path.addLine(to: CGPoint(x: x + w2, y: y + r))
-            path.addLine(to: CGPoint(x: x + width, y: y + r))
-            path.addLine(to: CGPoint(x: x + width, y: y - r))
-            path.addLine(to: CGPoint(x: x + w2, y: y - r))
-            path.closeSubpath()
-        } else {
-            path.move(to: CGPoint(x: x, y: y - r))
-            path.addLine(to: CGPoint(x: x, y: y + r))
-            path.addLine(to: CGPoint(x: x + width, y: y + r))
-            path.addLine(to: CGPoint(x: x + width + w2, y: y))
-            path.addLine(to: CGPoint(x: x + width, y: y - r))
-            path.closeSubpath()
-        }
+        let rect = CGRect(x: x, y: y - r, width: width, height: height)
+        let rounded = UIBezierPath(roundedRect: rect, cornerRadius: 4)
         
         canvas.setFillColor(chartColors.markerBgColor.cgColor)
+        canvas.addPath(rounded.cgPath)
+        canvas.fillPath()
+        
         canvas.setStrokeColor(chartColors.markerBorderColor.cgColor)
         canvas.setLineWidth(0.5)
-        canvas.addPath(path)
-        canvas.fillPath()
-        canvas.addPath(path)
+        canvas.addPath(rounded.cgPath)
         canvas.strokePath()
     }
     
@@ -508,10 +495,10 @@ public class ChartPainter: BaseChartPainter {
         
         if text.size().width < max {
             if chartStyle.isShowDashLine {
-                // 绘制虚线（使用样式颜色）
+                // 绘制虚线（使用样式颜色和宽度）
                 while startX < (max - text.size().width - textPadding - textPadding) {
                     canvas.setStrokeColor(rt.lineColor.cgColor)
-                    canvas.setLineWidth(1.0)
+                    canvas.setLineWidth(rt.dashLineWidth)
                     canvas.move(to: CGPoint(x: x + startX, y: y))
                     canvas.addLine(to: CGPoint(x: x + startX + dashWidth, y: y))
                     canvas.strokePath()
@@ -521,7 +508,8 @@ public class ChartPainter: BaseChartPainter {
             
             // 绘制价格背景（使用样式配置）
             // 纠正越界：背景矩形右对齐在屏幕内
-            let rectWidth = text.size().width + 2 * textPadding
+            let extraPadding: Double = 4.0  // 额外的内间距
+            let rectWidth = text.size().width + 2 * (textPadding + extraPadding)
             let edgeInset: Double = 1.0 // 防边框被遮住
             var left = width - rectWidth - edgeInset
             if left < 0 { left = 0 }
@@ -537,12 +525,12 @@ public class ChartPainter: BaseChartPainter {
             canvas.addPath(roundedRect.cgPath)
             canvas.fillPath()
             canvas.setStrokeColor(rt.labelBorderColor.cgColor)
-            canvas.setLineWidth(1.0)
+            canvas.setLineWidth(0.5)
             canvas.addPath(roundedRect.cgPath)
             canvas.strokePath()
             
             let textY = Double(rect.midY) - text.size().height / 2
-            text.draw(at: CGPoint(x: left + textPadding, y: textY))
+            text.draw(at: CGPoint(x: left + textPadding + extraPadding, y: textY))
         } else {
             // 价格显示在图表上
             startX = 0
@@ -556,10 +544,10 @@ public class ChartPainter: BaseChartPainter {
             }
             
             if chartStyle.isShowDashLine {
-                // 绘制长虚线（使用样式颜色）
+                // 绘制长虚线（使用样式颜色和宽度）
                 while startX < width {
                     canvas.setStrokeColor(rt.lineColor.cgColor)
-                    canvas.setLineWidth(1.0)
+                    canvas.setLineWidth(rt.dashLineWidth)
                     canvas.move(to: CGPoint(x: startX, y: adjustedY))
                     canvas.addLine(to: CGPoint(x: startX + dashWidth, y: adjustedY))
                     canvas.strokePath()
@@ -569,12 +557,13 @@ public class ChartPainter: BaseChartPainter {
             
             // 绘制带三角形的价格标签（使用样式配置）
             let padding: Double = Swift.max(3.0, textPadding / 2)
+            let extraPadding: Double = 4.0  // 额外的左右内间距
             let triangleHeight: Double = rt.triangleHeight
             let triangleWidth: Double = rt.triangleWidth
             
             var left = width - text.size().width * 2.5
             let top = adjustedY - text.size().height / 2 - padding - rt.labelExtraHeight / 2
-            var right = left + text.size().width + padding * 2 + triangleWidth + padding
+            var right = left + text.size().width + padding * 2 + triangleWidth + padding + extraPadding * 2
             let bottom = top + text.size().height + padding * 2 + rt.labelExtraHeight
             let rectRadius = (bottom - top) / 2
             // 右侧防裁剪
@@ -598,11 +587,11 @@ public class ChartPainter: BaseChartPainter {
             canvas.strokePath()
             
             let textY = Double(rect.midY) - text.size().height / 2
-            text.draw(at: CGPoint(x: left + padding, y: textY))
+            text.draw(at: CGPoint(x: left + padding + extraPadding, y: textY))
             
             // 绘制三角形
             let trianglePath = CGMutablePath()
-            let dx = text.size().width + left + padding + padding
+            let dx = text.size().width + left + padding + extraPadding + padding
             let dy = top + (bottom - top - triangleHeight) / 2
             trianglePath.move(to: CGPoint(x: dx, y: dy))
             trianglePath.addLine(to: CGPoint(x: dx + triangleWidth, y: dy + triangleHeight / 2))

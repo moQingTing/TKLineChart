@@ -330,7 +330,7 @@ public class ChartConfiguration {
         // 实时线颜色
         public var lineColor: UIColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)
         // 实时线宽度
-        public var lineWidth: Double = 1.0
+        public var lineWidth: Double = 0.5
         // 实时价格框背景色
         public var priceBoxBgColor: UIColor = UIColor.white
         // 实时价格框边框色

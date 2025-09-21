@@ -218,10 +218,10 @@ public class ChartStyle {
     public var bottomDateHigh: Double = 15.0
     public var childPadding: Double = 15.0
     
-    public var defaultTextSize: Double = 8.0
+    public var defaultTextSize: Double = 9.0
     
     // 曲线宽度
-    public var lineStrokeWidth: Double = 1.0
+    public var lineStrokeWidth: Double = 1.5
     
     // 虚线宽度
     public var dashWidth: Double = 4.0
@@ -239,8 +239,9 @@ public class ChartStyle {
     // 实时价格样式
     public struct RealTimePriceStyle {
         public var lineColor: UIColor = UIColor.black
-        public var dashWidth: Double = 3.0
-        public var dashSpace: Double = 1.4
+        public var dashWidth: Double = 4
+        public var dashSpace: Double = 4
+        public var dashLineWidth: Double = 0.5  // 虚线宽度
         public var labelTextColor: UIColor = UIColor.black
         public var labelBgColor: UIColor = UIColor.white
         public var labelBorderColor: UIColor = UIColor.black
