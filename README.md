@@ -37,7 +37,9 @@
 - **Swift**: 5.7+
 - **包管理**: Swift Package Manager (SPM)
 
-## 安装（Swift Package Manager）
+## 安装
+
+### Swift Package Manager (推荐)
 在 Xcode 中选择 File → Add Packages…，输入仓库地址并添加：
 
 ```
@@ -45,6 +47,19 @@ https://github.com/moQingTing/TKLineChart
 ```
 
 添加完成后，在目标的 Frameworks, Libraries, and Embedded Content 中确认已包含 `TKLineChart`。
+
+### CocoaPods
+在 `Podfile` 中添加：
+
+```ruby
+pod 'TKLineChart', '~> 2.0.0'
+```
+
+然后运行：
+
+```bash
+pod install
+```
 
 ## 快速集成
 ### 1) 创建并放置视图
