@@ -38,9 +38,12 @@ NSLayoutConstraint.activate([
 
 ### 2) 基本配置
 ```swift
-chartView.chartColors = ChartColors(isDarkMode: false)
-chartView.chartStyle = ChartStyle()
-chartView.fractionDigits = 2
+// 创建图表配置
+let chartConfiguration = ChartConfiguration()
+chartView.chartConfiguration = chartConfiguration
+
+// 设置数字小数位数
+chartView.numberFractionDigits = 2
 
 // 主图：MA/EMA/BOLL 三选一（带参数）
 chartView.mainState = .ema(5, 10, 20)
@@ -122,13 +125,15 @@ depthView.asks = [DepthEntity(price: 100.2, amount: 130)]
 // 创建图表配置实例
 let chartConfiguration = ChartConfiguration()
 
-// 应用内置主题
-chartConfiguration.applyBinanceTheme()  // 币安风格
-chartConfiguration.applyLightTheme()    // 浅色主题
-chartConfiguration.applyDarkTheme()     // 深色主题
+// 应用内置主题（通过ChartColors）
+let chartColors = ChartColors(isDarkMode: false)
+chartColors.applyBinanceTheme()  // 币安风格
+chartColors.applyLightTheme()    // 浅色主题
+chartColors.applyDarkTheme()     // 深色主题
 
 // 设置到图表
 chartView.chartConfiguration = chartConfiguration
+chartView.chartColors = chartColors
 ```
 
 ### 颜色配置
@@ -142,12 +147,13 @@ chartConfiguration.candleStyle.upColor = UIColor.green      // 上涨颜色
 chartConfiguration.candleStyle.downColor = UIColor.red      // 下跌颜色
 
 // 背景颜色
-chartConfiguration.backgroundColor = UIColor.black          // 主背景色
-chartConfiguration.gridColor = UIColor.gray                 // 网格线颜色
+chartColors.bgColor = UIColor.black                         // 主背景色
+chartColors.gridColor = UIColor.gray                        // 网格线颜色
 
 // 文字颜色
-chartConfiguration.textColor = UIColor.white                // 主文字颜色
-chartConfiguration.selectedPriceTextColor = UIColor.white   // 选中价格文字颜色
+chartColors.yAxisTextColor = UIColor.white                  // Y轴文字颜色
+chartColors.xAxisTextColor = UIColor.white                  // X轴文字颜色
+chartColors.selectedPriceTextColor = UIColor.white          // 选中价格文字颜色
 
 // 技术指标颜色
 chartColors.ma5Color = UIColor.yellow                       // MA5线颜色
@@ -187,48 +193,53 @@ chartColors.realTimeTextBorderColor = UIColor.gray          // 实时价格边�
 
 ### 样式配置
 ```swift
-// 基础样式配置
-chartConfiguration.chartStyle.pointWidth = 8.0              // 点与点的距离
-chartConfiguration.chartStyle.candleWidth = 6.0             // 蜡烛宽度
-chartConfiguration.chartStyle.candleLineWidth = 0.8         // 蜡烛中间线宽度
-chartConfiguration.chartStyle.volWidth = 6.5                // 成交量柱子宽度
-chartConfiguration.chartStyle.macdWidth = 6.5               // MACD柱子宽度
+// 蜡烛图样式配置
+chartConfiguration.candleStyle.width = 6.0                  // 蜡烛宽度
+chartConfiguration.candleStyle.lineWidth = 0.8              // 蜡烛中间线宽度
+chartConfiguration.candleStyle.isSolid = true               // 是否实心蜡烛
 
-// 交叉线样式
-chartConfiguration.chartStyle.vCrossWidth = 0.5             // 垂直交叉线宽度
-chartConfiguration.chartStyle.hCrossWidth = 0.5             // 水平交叉线宽度
+// 成交量样式配置
+chartConfiguration.volumeStyle.barWidth = 6.5               // 成交量柱子宽度
+chartConfiguration.volumeStyle.upColor = UIColor.green      // 上涨成交量颜色
+chartConfiguration.volumeStyle.downColor = UIColor.red      // 下跌成交量颜色
+
+// MACD样式配置
+chartConfiguration.macdStyle.barWidth = 6.5                 // MACD柱子宽度
+chartConfiguration.macdStyle.difColor = UIColor.yellow      // DIF线颜色
+chartConfiguration.macdStyle.deaColor = UIColor.blue        // DEA线颜色
+chartConfiguration.macdStyle.barColor = UIColor.red         // MACD柱状图颜色
 
 // 网格配置
-chartConfiguration.chartStyle.gridRows = 2                  // 网格行数
-chartConfiguration.chartStyle.gridColumns = 3               // 网格列数
-chartConfiguration.chartStyle.gridStrokeWidth = 0.5         // 网格线宽度
+chartConfiguration.chartStyleConfig.gridRows = 2            // 网格行数
+chartConfiguration.chartStyleConfig.gridColumns = 3         // 网格列数
+chartConfiguration.chartStyleConfig.gridStrokeWidth = 0.5   // 网格线宽度
 
 // 内边距配置
-chartConfiguration.chartStyle.topPadding = 15.0             // 顶部内边距
-chartConfiguration.chartStyle.bottomDateHigh = 15.0         // 底部日期区域高度
-chartConfiguration.chartStyle.childPadding = 15.0           // 子图内边距
+chartConfiguration.chartStyleConfig.topPadding = 15.0       // 顶部内边距
+chartConfiguration.chartStyleConfig.bottomDateHigh = 15.0   // 底部日期区域高度
+chartConfiguration.chartStyleConfig.childPadding = 15.0     // 子图内边距
 
 // 文字和线条样式
-chartConfiguration.chartStyle.defaultTextSize = 9.0         // 默认文字大小
-chartConfiguration.chartStyle.lineStrokeWidth = 1.5         // 曲线宽度
-chartConfiguration.chartStyle.dashWidth = 4.0               // 虚线宽度
-chartConfiguration.chartStyle.dashSpace = 4.0               // 虚线间距
-chartConfiguration.chartStyle.isShowDashLine = true         // 是否显示虚线
+chartConfiguration.chartStyleConfig.defaultTextSize = 9.0   // 默认文字大小
+chartConfiguration.chartStyleConfig.lineStrokeWidth = 1.5   // 曲线宽度
+chartConfiguration.chartStyleConfig.dashWidth = 4.0         // 虚线宽度
+chartConfiguration.chartStyleConfig.dashSpace = 4.0         // 虚线间距
+chartConfiguration.chartStyleConfig.isShowDashLine = true   // 是否显示虚线
 
 // 副图配置
-chartConfiguration.chartStyle.singleSecondaryMaxHeightRatio = 0.15  // 副图最大高度比例
+chartConfiguration.chartStyleConfig.singleSecondaryMaxHeightRatio = 0.15  // 副图最大高度比例
 
 // 实时价格样式
-chartConfiguration.chartStyle.realTimePriceStyle.lineColor = UIColor.blue
-chartConfiguration.chartStyle.realTimePriceStyle.dashLineWidth = 1.0
-chartConfiguration.chartStyle.realTimePriceStyle.labelBgColor = UIColor.white
-chartConfiguration.chartStyle.realTimePriceStyle.labelCornerRadius = 4.0
-chartConfiguration.chartStyle.realTimePriceStyle.labelTextPadding = 6.0
-chartConfiguration.chartStyle.realTimePriceStyle.labelExtraHeight = 8.0
-chartConfiguration.chartStyle.realTimePriceStyle.triangleWidth = 5.0
-chartConfiguration.chartStyle.realTimePriceStyle.triangleHeight = 8.0
-chartConfiguration.chartStyle.realTimePriceStyle.rightInset = 40.0
-chartConfiguration.chartStyle.realTimePriceStyle.tapHotZoneWidth = 80.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.lineColor = UIColor.blue
+chartConfiguration.chartStyleConfig.realTimePriceStyle.dashLineWidth = 1.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.labelBgColor = UIColor.white
+chartConfiguration.chartStyleConfig.realTimePriceStyle.labelCornerRadius = 4.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.labelTextPadding = 6.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.labelExtraHeight = 8.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.triangleWidth = 5.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.triangleHeight = 8.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.rightInset = 40.0
+chartConfiguration.chartStyleConfig.realTimePriceStyle.tapHotZoneWidth = 80.0
 
 // 信息面板样式
 chartConfiguration.infoPanelStyle.backgroundColor = UIColor.black
@@ -236,79 +247,74 @@ chartConfiguration.infoPanelStyle.textColor = UIColor.white
 chartConfiguration.infoPanelStyle.cornerRadius = 6.0
 ```
 
-### 专用样式类
-```swift
-// 交易K线图专用样式（继承自ChartStyle）
-let tradeStyle = TradeKlineChartStyle()
-tradeStyle.lineStrokeWidth = 2.0        // 交易图线条更粗
-tradeStyle.isShowDashLine = false       // 交易图不显示虚线
-
-// 应用到图表
-chartView.chartStyle = tradeStyle
-```
-
 ### 技术指标配置
 ```swift
 // 移动平均线样式
-chartConfiguration.movingAverageStyle.maColors = [
-    UIColor.yellow,    // MA5
-    UIColor.blue,      // MA10
-    UIColor.red        // MA20
-]
+chartConfiguration.movingAverageStyle.ma5Color = UIColor.yellow    // MA5颜色
+chartConfiguration.movingAverageStyle.ma10Color = UIColor.blue     // MA10颜色
+chartConfiguration.movingAverageStyle.ma20Color = UIColor.red      // MA20颜色
+chartConfiguration.movingAverageStyle.ma30Color = UIColor.purple   // MA30颜色
+chartConfiguration.movingAverageStyle.lineWidth = 1.0              // 线宽
 
 // EMA样式
-chartConfiguration.emaStyle.colors = [
-    UIColor.orange,    // EMA5
-    UIColor.purple,    // EMA10
-    UIColor.cyan       // EMA20
-]
+chartConfiguration.emaStyle.ema5Color = UIColor.orange             // EMA5颜色
+chartConfiguration.emaStyle.ema10Color = UIColor.purple            // EMA10颜色
+chartConfiguration.emaStyle.ema20Color = UIColor.cyan              // EMA20颜色
+chartConfiguration.emaStyle.lineWidth = 1.0                        // 线宽
 
 // 布林带样式
-chartConfiguration.bollStyle.upColor = UIColor.green
-chartConfiguration.bollStyle.mbColor = UIColor.blue
-chartConfiguration.bollStyle.dnColor = UIColor.red
+chartConfiguration.bollingerBandsStyle.upperColor = UIColor.green  // 上轨颜色
+chartConfiguration.bollingerBandsStyle.middleColor = UIColor.blue  // 中轨颜色
+chartConfiguration.bollingerBandsStyle.lowerColor = UIColor.red    // 下轨颜色
+chartConfiguration.bollingerBandsStyle.lineWidth = 1.0             // 线宽
 ```
 
 ### 副图指标配置
 ```swift
 // 成交量样式
-chartConfiguration.volStyle.upColor = UIColor.green
-chartConfiguration.volStyle.downColor = UIColor.red
+chartConfiguration.volumeStyle.upColor = UIColor.green      // 上涨成交量颜色
+chartConfiguration.volumeStyle.downColor = UIColor.red      // 下跌成交量颜色
+chartConfiguration.volumeStyle.barWidth = 6.5               // 柱子宽度
+chartConfiguration.volumeStyle.ma5Color = UIColor.yellow    // MA5颜色
+chartConfiguration.volumeStyle.ma10Color = UIColor.blue     // MA10颜色
 
 // MACD样式
-chartConfiguration.macdStyle.difColor = UIColor.yellow
-chartConfiguration.macdStyle.deaColor = UIColor.blue
-chartConfiguration.macdStyle.barColor = UIColor.red
+chartConfiguration.macdStyle.difColor = UIColor.yellow      // DIF线颜色
+chartConfiguration.macdStyle.deaColor = UIColor.blue        // DEA线颜色
+chartConfiguration.macdStyle.barColor = UIColor.red         // MACD柱状图颜色
+chartConfiguration.macdStyle.barWidth = 6.5                 // 柱子宽度
 
 // KDJ样式
-chartConfiguration.kdjStyle.kColor = UIColor.yellow
-chartConfiguration.kdjStyle.dColor = UIColor.blue
-chartConfiguration.kdjStyle.jColor = UIColor.red
+chartConfiguration.kdjStyle.kColor = UIColor.yellow         // K线颜色
+chartConfiguration.kdjStyle.dColor = UIColor.blue           // D线颜色
+chartConfiguration.kdjStyle.jColor = UIColor.red            // J线颜色
+chartConfiguration.kdjStyle.lineWidth = 1.0                 // 线宽
 
 // RSI样式
-chartConfiguration.rsiStyle.rsiColor = UIColor.orange
-chartConfiguration.rsiStyle.rsi70Color = UIColor.red
-chartConfiguration.rsiStyle.rsi30Color = UIColor.green
+chartConfiguration.rsiStyle.rsi6Color = UIColor.orange      // RSI6颜色
+chartConfiguration.rsiStyle.rsi12Color = UIColor.blue       // RSI12颜色
+chartConfiguration.rsiStyle.rsi24Color = UIColor.red        // RSI24颜色
+chartConfiguration.rsiStyle.lineWidth = 1.0                 // 线宽
+
+// Williams %R样式
+chartConfiguration.williamsRStyle.lineColor = UIColor.purple // Williams %R线颜色
+chartConfiguration.williamsRStyle.lineWidth = 1.0            // 线宽
 ```
 
 ### 便捷配置方法
 ```swift
-// 批量设置蜡烛图颜色
-chartConfiguration.setCandleColors(up: UIColor.green, down: UIColor.red)
+// 直接设置蜡烛图颜色
+chartConfiguration.candleStyle.upColor = UIColor.green
+chartConfiguration.candleStyle.downColor = UIColor.red
 
-// 批量设置背景颜色
-chartConfiguration.setBackgroundColors(
-    main: UIColor.black,
-    grid: UIColor.gray,
-    selected: UIColor.darkGray
-)
+// 直接设置背景颜色
+chartColors.bgColor = UIColor.black
+chartColors.gridColor = UIColor.gray
 
-// 批量设置文字颜色
-chartConfiguration.setTextColors(
-    main: UIColor.white,
-    selected: UIColor.yellow,
-    price: UIColor.orange
-)
+// 直接设置文字颜色
+chartColors.yAxisTextColor = UIColor.white
+chartColors.xAxisTextColor = UIColor.white
+chartColors.selectedPriceTextColor = UIColor.yellow
 ```
 
 ### 数字格式化配置
@@ -317,36 +323,44 @@ chartConfiguration.setTextColors(
 chartConfiguration.numberFractionDigits = 2  // 价格显示2位小数
 chartConfiguration.numberFractionDigits = 4  // 价格显示4位小数
 
-// 设置大数缩写
-chartConfiguration.isAbbreviateLargeNumbers = true  // 启用大数缩写（如：1.2K, 1.5M）
+// 设置到图表
+chartView.numberFractionDigits = chartConfiguration.numberFractionDigits
 ```
 
 ### 完整配置示例
 ```swift
 // 创建自定义配置
 let config = ChartConfiguration()
+let colors = ChartColors(isDarkMode: false)
 
 // 应用币安主题
-config.applyBinanceTheme()
+colors.applyBinanceTheme()
 
 // 自定义调整
 config.candleStyle.upColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0)  // #33D587
 config.candleStyle.downColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0)  // #F5475E
-config.chartStyle.realTimePriceStyle.dashLineWidth = 1.5
+config.chartStyleConfig.realTimePriceStyle.dashLineWidth = 1.5
 config.infoPanelStyle.cornerRadius = 8.0
 config.numberFractionDigits = 4
 
 // 应用到图表
 chartView.chartConfiguration = config
+chartView.chartColors = colors
+chartView.numberFractionDigits = config.numberFractionDigits
 ```
 
-### 配置更新回调
+### 配置更新
 ```swift
-// 监听配置变化
-chartView.onConfigurationChanged = { newConfig in
-    // 配置更新后的处理逻辑
-    print("配置已更新")
-}
+// 直接更新配置
+chartView.chartConfiguration = newConfig
+chartView.chartColors = newColors
+
+// 或者更新特定属性
+chartView.chartConfiguration.candleStyle.upColor = UIColor.green
+chartView.chartColors.bgColor = UIColor.black
+
+// 刷新图表显示
+chartView.setNeedsDisplay()
 ```
 
 ## 示例与演示
@@ -355,6 +369,24 @@ chartView.onConfigurationChanged = { newConfig in
   - 指标切换（主图单选、副图多选）
   - 横屏全屏展示与滚动指标栏
   - 模拟数据与实时更新
+
+### 应用截图
+
+<div align="center">
+  <img src="images/1.png" alt="K线图主界面" width="300" />
+  <img src="images/2.png" alt="K线图指标配置" width="300" />
+</div>
+
+<div align="center">
+  <img src="images/3.png" alt="K线图全屏模式" width="300" />
+  <img src="images/4.png" alt="K线图深度图" width="300" />
+</div>
+
+**功能展示：**
+- **图1**: K线图主界面，支持蜡烛图和线图切换，显示多种技术指标
+- **图2**: 指标配置界面，可自定义主图和副图指标参数
+- **图3**: 横屏全屏模式，提供更好的图表查看体验
+- **图4**: 深度图展示，显示买卖盘深度信息
 
 ## 贡献与支持
 - 欢迎提 Issue/PR，一起完善指标、性能和动画。

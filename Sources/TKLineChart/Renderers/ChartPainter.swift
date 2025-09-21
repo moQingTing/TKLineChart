@@ -18,7 +18,7 @@ public class ChartPainter: BaseChartPainter {
     private let selectY: Double
 
     public init(datas: [CompleteKLineEntity]?, scaleX: Double, scrollX: Double, isLongPress: Bool,
-                selectX: Double, selectY: Double, chartColors: ChartColors, chartStyle: ChartStyle,
+                selectX: Double, selectY: Double, chartColors: ChartColors,
                 secondaryStates: [SecondaryState], mainState: MainState, isLine: Bool,
                 chartConfiguration: ChartConfiguration) {
         self.chartColors = chartColors
@@ -27,7 +27,7 @@ public class ChartPainter: BaseChartPainter {
         self.selectY = selectY
         
         super.init(datas: datas, scaleX: scaleX, scrollX: scrollX, isLongPress: isLongPress,
-                  selectX: selectX, chartStyle: chartStyle, mainState: mainState, isLine: isLine)
+                  selectX: selectX, mainState: mainState, isLine: isLine)
     }
     
     public override func initRect(_ size: CGSize) {
@@ -36,7 +36,7 @@ public class ChartPainter: BaseChartPainter {
         width = Double(size.width)
         // 恢复对实时价格 rightInset 的支持：在布局层面为右侧增加可配置留白
         // 注意：rightInset 是屏幕像素，这里需按 scaleX 转为内容坐标
-        let rtInset = chartStyle.realTimePriceStyle.rightInset / scaleX
+        let rtInset = chartConfiguration.chartStyleConfig.realTimePriceStyle.rightInset / scaleX
         marginRight = ((width) / 5 - pointWidth) / scaleX + rtInset
         
         // 计算主图和副图的高度分配
@@ -44,21 +44,21 @@ public class ChartPainter: BaseChartPainter {
         
         if secondaryCount == 0 {
             // 没有副图时，主图占据全部高度
-            displayHeight = Double(size.height) - chartStyle.topPadding - chartStyle.bottomDateHigh
-            mainRect = CGRect(x: 0, y: chartStyle.topPadding, 
+            displayHeight = Double(size.height) - chartConfiguration.chartStyleConfig.topPadding - chartConfiguration.chartStyleConfig.bottomDateHigh
+            mainRect = CGRect(x: 0, y: chartConfiguration.chartStyleConfig.topPadding, 
                              width: size.width, height: displayHeight)
         } else {
             // 有副图时，主图和副图共享总高度
-            displayHeight = Double(size.height) - chartStyle.topPadding - chartStyle.bottomDateHigh
+            displayHeight = Double(size.height) - chartConfiguration.chartStyleConfig.topPadding - chartConfiguration.chartStyleConfig.bottomDateHigh
             
             // 计算主图和副图的高度分配
             // 确保主图至少占30%的高度，避免副图过多时主图过小
-            let maxSecondaryRatio = min(chartStyle.singleSecondaryMaxHeightRatio * Double(secondaryCount), 0.7)
+            let maxSecondaryRatio = min(chartConfiguration.chartStyleConfig.singleSecondaryMaxHeightRatio * Double(secondaryCount), 0.7)
             let mainHeight = displayHeight * (1.0 - maxSecondaryRatio)
             let secondaryHeight = (displayHeight - mainHeight) / Double(secondaryCount)
             
             // 主图rect
-            mainRect = CGRect(x: 0, y: chartStyle.topPadding, 
+            mainRect = CGRect(x: 0, y: chartConfiguration.chartStyleConfig.topPadding, 
                              width: size.width, height: mainHeight)
             
             // 副图rect（多个副图垂直排列）
@@ -103,8 +103,8 @@ public class ChartPainter: BaseChartPainter {
     
     public override func initChartRenderer() {
         mainRenderer = MainRenderer(chartRect: mainRect, maxValue: mainMaxValue, minValue: mainMinValue,
-                                  topPadding: chartStyle.topPadding, state: mainState, isLine: isLine,
-                                  chartStyle: chartStyle, chartColors: chartColors,
+                                  topPadding: chartConfiguration.chartStyleConfig.topPadding, state: mainState, isLine: isLine,
+                                  chartColors: chartColors,
                                   chartConfiguration: chartConfiguration)
         
         // 副图（多个副图分别显示）
@@ -114,29 +114,29 @@ public class ChartPainter: BaseChartPainter {
             
             secondaryChartRendererMap[secondaryState] = SecondaryRenderer(
                 chartRect: rect, maxValue: maxMinEntity.max, minValue: maxMinEntity.min,
-                topPadding: chartStyle.childPadding, secondaryState: secondaryState,
-                chartStyle: chartStyle, chartColors: chartColors,
+                topPadding: chartConfiguration.chartStyleConfig.childPadding, secondaryState: secondaryState,
+                chartColors: chartColors,
                 chartConfiguration: chartConfiguration)
         }
     }
     
     public override func drawBg(_ canvas: CGContext, _ size: CGSize) {
         canvas.setFillColor(chartColors.bgColor.cgColor)
-        let mainRect = CGRect(x: 0, y: 0, width: mainRect.width, height: mainRect.height + chartStyle.topPadding)
+        let mainRect = CGRect(x: 0, y: 0, width: mainRect.width, height: mainRect.height + chartConfiguration.chartStyleConfig.topPadding)
         canvas.fill(mainRect)
 
         // 底部日期带背景使用 xAxisTextBgColor（黑色），以便白色日期文字可见
-        let dateRect = CGRect(x: 0, y: size.height - chartStyle.bottomDateHigh,
-                             width: size.width, height: chartStyle.bottomDateHigh)
+        let dateRect = CGRect(x: 0, y: size.height - chartConfiguration.chartStyleConfig.bottomDateHigh,
+                             width: size.width, height: chartConfiguration.chartStyleConfig.bottomDateHigh)
         // canvas.setFillColor(chartColors.xAxisTextBgColor.cgColor)
         canvas.fill(dateRect)
     }
     
     public override func drawGrid(_ canvas: CGContext) {
-        mainRenderer?.drawGrid(canvas, gridRows: chartStyle.gridRows, gridColumns: chartStyle.gridColumns)
+        mainRenderer?.drawGrid(canvas, gridRows: chartConfiguration.chartStyleConfig.gridRows, gridColumns: chartConfiguration.chartStyleConfig.gridColumns)
         
         for (_, renderer) in secondaryChartRendererMap {
-            renderer.drawGrid(canvas, gridRows: chartStyle.gridRows, gridColumns: chartStyle.gridColumns)
+            renderer.drawGrid(canvas, gridRows: chartConfiguration.chartStyleConfig.gridRows, gridColumns: chartConfiguration.chartStyleConfig.gridColumns)
         }
     }
     
@@ -177,20 +177,20 @@ public class ChartPainter: BaseChartPainter {
     
     public override func drawRightText(_ canvas: CGContext) {
         let textStyle = getTextStyle(chartColors.yAxisTextColor)
-        mainRenderer?.drawRightText(canvas, textStyle: textStyle, gridRows: chartStyle.gridRows)
+        mainRenderer?.drawRightText(canvas, textStyle: textStyle, gridRows: chartConfiguration.chartStyleConfig.gridRows)
         
         for (_, renderer) in secondaryChartRendererMap {
-            renderer.drawRightText(canvas, textStyle: textStyle, gridRows: chartStyle.gridRows)
+            renderer.drawRightText(canvas, textStyle: textStyle, gridRows: chartConfiguration.chartStyleConfig.gridRows)
         }
     }
     
     
     public override func drawDate(_ canvas: CGContext, _ size: CGSize) {
-        let columnSpace = Double(size.width) / Double(chartStyle.gridColumns)
+        let columnSpace = Double(size.width) / Double(chartConfiguration.chartStyleConfig.gridColumns)
         let startX = getX(startIndex) - pointWidth / 2
         let stopX = getX(stopIndex) + pointWidth / 2
         
-        for i in 0...chartStyle.gridColumns {
+        for i in 0...chartConfiguration.chartStyleConfig.gridColumns {
             let translateX = xToTranslateX(columnSpace * Double(i))
             if translateX >= startX && translateX <= stopX {
                 let index = indexOfTranslateX(translateX)
@@ -199,7 +199,7 @@ public class ChartPainter: BaseChartPainter {
                 let dateText = DataUtil.getDate(datas[index].timestamp)
                 let text = NSAttributedString(string: dateText, attributes: getTextStyle(chartColors.xAxisTextColor))
                 let textSize = text.size()
-                let y = Double(size.height) - (chartStyle.bottomDateHigh - textSize.height) / 2 - textSize.height
+                let y = Double(size.height) - (chartConfiguration.chartStyleConfig.bottomDateHigh - textSize.height) / 2 - textSize.height
                 text.draw(at: CGPoint(x: columnSpace * Double(i) - textSize.width / 2, y: y))
             }
         }
@@ -256,7 +256,7 @@ public class ChartPainter: BaseChartPainter {
         // 底部时间文字颜色：白色
         let dateTextAttr = NSAttributedString(string: dateText, attributes: getTextStyle(textColor))
         let dateTextWidth = dateTextAttr.size().width
-        let bandTop = Double(size.height) - chartStyle.bottomDateHigh
+        let bandTop = Double(size.height) - chartConfiguration.chartStyleConfig.bottomDateHigh
         let baseLine = textHeight / 2
         let extraHeight: Double = 4 // 时间背景额外高度
         let rectHeight = baseLine + r + extraHeight
@@ -272,9 +272,9 @@ public class ChartPainter: BaseChartPainter {
         if rectX + rectWidth > width { rectX = width - rectWidth }
         
         // 在底部日期带内垂直居中
-        var dateY = bandTop + (chartStyle.bottomDateHigh - rectHeight) / 2
+        var dateY = bandTop + (chartConfiguration.chartStyleConfig.bottomDateHigh - rectHeight) / 2
         if dateY < bandTop { dateY = bandTop }
-        if dateY + rectHeight > bandTop + chartStyle.bottomDateHigh { dateY = bandTop + chartStyle.bottomDateHigh - rectHeight }
+        if dateY + rectHeight > bandTop + chartConfiguration.chartStyleConfig.bottomDateHigh { dateY = bandTop + chartConfiguration.chartStyleConfig.bottomDateHigh - rectHeight }
         
         // 复用 drawInfoBox 方法绘制时间背景框
         drawInfoBox(canvas, x: rectX, y: dateY + rectHeight / 2, width: rectWidth, height: rectHeight, isLeft: false)
@@ -434,10 +434,10 @@ public class ChartPainter: BaseChartPainter {
         
         // 交叉线统一用黑色
         canvas.setStrokeColor(UIColor.black.cgColor)
-        canvas.setLineWidth(CGFloat(chartStyle.vCrossWidth))
+        canvas.setLineWidth(CGFloat(chartConfiguration.chartStyleConfig.vCrossWidth))
         // 使用虚线样式
-        if chartStyle.dashWidth > 0 && chartStyle.dashSpace > 0 {
-            canvas.setLineDash(phase: 0, lengths: [CGFloat(chartStyle.dashWidth), CGFloat(chartStyle.dashSpace)])
+        if chartConfiguration.chartStyleConfig.dashWidth > 0 && chartConfiguration.chartStyleConfig.dashSpace > 0 {
+            canvas.setLineDash(phase: 0, lengths: [CGFloat(chartConfiguration.chartStyleConfig.dashWidth), CGFloat(chartConfiguration.chartStyleConfig.dashSpace)])
         }
         
         let x = getX(index)
@@ -451,12 +451,12 @@ public class ChartPainter: BaseChartPainter {
         }
         
         // 绘制竖线
-        canvas.move(to: CGPoint(x: x, y: chartStyle.topPadding))
-        canvas.addLine(to: CGPoint(x: x, y: Double(size.height) - chartStyle.bottomDateHigh))
+        canvas.move(to: CGPoint(x: x, y: chartConfiguration.chartStyleConfig.topPadding))
+        canvas.addLine(to: CGPoint(x: x, y: Double(size.height) - chartConfiguration.chartStyleConfig.bottomDateHigh))
         canvas.strokePath()
         
         // 绘制横线
-        canvas.setLineWidth(CGFloat(chartStyle.hCrossWidth))
+        canvas.setLineWidth(CGFloat(chartConfiguration.chartStyleConfig.hCrossWidth))
         canvas.move(to: CGPoint(x: -translateX, y: y))
         canvas.addLine(to: CGPoint(x: -translateX + width / scaleX, y: y))
         canvas.strokePath()
@@ -476,7 +476,7 @@ public class ChartPainter: BaseChartPainter {
 
         let point = datas.last!
         // 实时价格文字（使用样式配置）
-        let rt = chartStyle.realTimePriceStyle
+        let rt = chartConfiguration.chartStyleConfig.realTimePriceStyle
         let text = NSAttributedString(string: format(point.close, fractionDigits: chartConfiguration.numberFractionDigits), 
                                     attributes: getTextStyle(rt.labelTextColor))
         let textPadding: Double = rt.labelTextPadding
@@ -494,7 +494,7 @@ public class ChartPainter: BaseChartPainter {
         let space = dashSpace + dashWidth
         
         if text.size().width < max {
-            if chartStyle.isShowDashLine {
+            if chartConfiguration.chartStyleConfig.isShowDashLine {
                 // 绘制虚线（使用样式颜色和宽度）
                 while startX < (max - text.size().width - textPadding - textPadding) {
                     canvas.setStrokeColor(rt.lineColor.cgColor)
@@ -543,7 +543,7 @@ public class ChartPainter: BaseChartPainter {
                 adjustedY = y
             }
             
-            if chartStyle.isShowDashLine {
+            if chartConfiguration.chartStyleConfig.isShowDashLine {
                 // 绘制长虚线（使用样式颜色和宽度）
                 while startX < width {
                     canvas.setStrokeColor(rt.lineColor.cgColor)

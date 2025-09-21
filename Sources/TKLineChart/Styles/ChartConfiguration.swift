@@ -1,5 +1,246 @@
 import UIKit
 
+// MARK: - 图表颜色配置（完全可自定义）
+public class ChartColors {
+    public let isDarkMode: Bool
+    
+    // 可自定义的颜色属性
+    public var bgColor: UIColor
+    public var kLineColor: UIColor
+    public var xyLineColor: UIColor
+    public var gridColor: UIColor
+    public var kLineShadowColors: [UIColor]
+    public var ma5Color: UIColor
+    public var ma10Color: UIColor
+    public var ma30Color: UIColor
+    public var upColor: UIColor
+    public var downColor: UIColor
+    public var volColor: UIColor
+    public var macdColor: UIColor
+    public var difColor: UIColor
+    public var deaColor: UIColor
+    public var kColor: UIColor
+    public var dColor: UIColor
+    public var jColor: UIColor
+    public var rsiColor: UIColor
+    public var yAxisTextColor: UIColor
+    public var xAxisTextColor: UIColor
+    public var selectedPriceTextColor: UIColor
+    public var selectedPriceTextBgColor: UIColor
+    public var maxMinTextColor: UIColor
+    public var depthBuyColor: UIColor
+    public var depthSellColor: UIColor
+    public var depthSellColors: [UIColor]
+    public var depthBuyColors: [UIColor]
+    public var depthTextColor: UIColor
+    public var markerBorderColor: UIColor
+    public var markerBgColor: UIColor
+    public var realTimeBgColor: UIColor
+    public var rightRealTimeTextColor: UIColor
+    public var realTimeTextBorderColor: UIColor
+    public var realTimeTextColor: UIColor
+    public var realTimeLineColor: UIColor
+    public var realTimeLongLineColor: UIColor
+    public var pointColor: UIColor
+    
+    // 默认初始化方法
+    public init(isDarkMode: Bool = false) {
+        self.isDarkMode = isDarkMode
+        
+        // 根据主题设置默认颜色
+        if isDarkMode {
+            self.bgColor = UIColor(red: 0.075, green: 0.090, blue: 0.137, alpha: 1.0)
+            self.yAxisTextColor = UIColor.white
+            self.xAxisTextColor = UIColor.white
+            self.selectedPriceTextColor = UIColor.white
+            self.selectedPriceTextBgColor = UIColor.black
+            self.maxMinTextColor = UIColor.white
+            self.depthTextColor = UIColor.white
+            self.markerBgColor = UIColor(red: 0.051, green: 0.090, blue: 0.133, alpha: 1.0)
+            self.rightRealTimeTextColor = UIColor.white
+            self.realTimeTextColor = UIColor.white
+            self.pointColor = UIColor.white
+        } else {
+            self.bgColor = UIColor.white
+            self.yAxisTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+            self.xAxisTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+            self.selectedPriceTextColor = UIColor.white
+            self.selectedPriceTextBgColor = UIColor.black
+            self.maxMinTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+            self.depthTextColor = UIColor.black
+            self.markerBgColor = UIColor(red: 0.051, green: 0.090, blue: 0.133, alpha: 1.0)
+            self.rightRealTimeTextColor = UIColor.white
+            self.realTimeTextColor = UIColor.white
+            self.pointColor = UIColor.white
+        }
+        
+        // 通用颜色设置
+        self.kLineColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)
+        self.xyLineColor = UIColor.gray.withAlphaComponent(0.5)
+        self.gridColor = UIColor.gray.withAlphaComponent(0.2)
+        self.kLineShadowColors = [
+            kLineColor.withAlphaComponent(0.6),
+            kLineColor.withAlphaComponent(0.1)
+        ]
+        self.ma5Color = UIColor.yellow.withAlphaComponent(0.6)
+        self.ma10Color = UIColor.systemPink.withAlphaComponent(0.6)
+        self.ma30Color = UIColor.purple.withAlphaComponent(0.6)
+        self.upColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0) // 红色表示上涨
+        self.downColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0) // 绿色表示下跌
+        self.volColor = UIColor(red: 0.278, green: 0.161, blue: 0.682, alpha: 1.0)
+        self.macdColor = UIColor(red: 0.278, green: 0.161, blue: 0.682, alpha: 1.0)
+        self.difColor = UIColor(red: 0.788, green: 0.722, blue: 0.522, alpha: 1.0)
+        self.deaColor = UIColor(red: 0.424, green: 0.690, blue: 0.651, alpha: 1.0)
+        self.kColor = UIColor(red: 0.788, green: 0.722, blue: 0.522, alpha: 1.0)
+        self.dColor = UIColor(red: 0.424, green: 0.690, blue: 0.651, alpha: 1.0)
+        self.jColor = UIColor(red: 0.600, green: 0.475, blue: 0.776, alpha: 1.0)
+        self.rsiColor = UIColor(red: 0.788, green: 0.722, blue: 0.522, alpha: 1.0)
+        self.depthBuyColor = UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0) // 红色买单
+        self.depthSellColor = UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0) // 绿色卖单
+        self.depthSellColors = [
+            UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 0.08),
+            UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 0.004)
+        ]
+        self.depthBuyColors = [
+            UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 0.08),
+            UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 0.004)
+        ]
+        self.markerBorderColor = UIColor(red: 0.424, green: 0.478, blue: 0.525, alpha: 1.0)
+        self.realTimeBgColor = kLineColor
+        self.realTimeTextBorderColor = UIColor(red: 0.424, green: 0.478, blue: 0.525, alpha: 1.0)
+        self.realTimeLineColor = kLineColor
+        self.realTimeLongLineColor = kLineColor
+    }
+    
+    // 完全自定义初始化方法
+    public init(
+        isDarkMode: Bool = false,
+        bgColor: UIColor? = nil,
+        kLineColor: UIColor? = nil,
+        xyLineColor: UIColor? = nil,
+        gridColor: UIColor? = nil,
+        kLineShadowColors: [UIColor]? = nil,
+        ma5Color: UIColor? = nil,
+        ma10Color: UIColor? = nil,
+        ma30Color: UIColor? = nil,
+        upColor: UIColor? = nil,
+        downColor: UIColor? = nil,
+        volColor: UIColor? = nil,
+        macdColor: UIColor? = nil,
+        difColor: UIColor? = nil,
+        deaColor: UIColor? = nil,
+        kColor: UIColor? = nil,
+        dColor: UIColor? = nil,
+        jColor: UIColor? = nil,
+        rsiColor: UIColor? = nil,
+        yAxisTextColor: UIColor? = nil,
+        xAxisTextColor: UIColor? = nil,
+        selectedPriceTextColor: UIColor? = nil,
+        selectedPriceTextBgColor: UIColor? = nil,
+        maxMinTextColor: UIColor? = nil,
+        depthBuyColor: UIColor? = nil,
+        depthSellColor: UIColor? = nil,
+        depthSellColors: [UIColor]? = nil,
+        depthBuyColors: [UIColor]? = nil,
+        depthTextColor: UIColor? = nil,
+        markerBorderColor: UIColor? = nil,
+        markerBgColor: UIColor? = nil,
+        realTimeBgColor: UIColor? = nil,
+        rightRealTimeTextColor: UIColor? = nil,
+        realTimeTextBorderColor: UIColor? = nil,
+        realTimeTextColor: UIColor? = nil,
+        realTimeLineColor: UIColor? = nil,
+        realTimeLongLineColor: UIColor? = nil,
+        pointColor: UIColor? = nil
+    ) {
+        self.isDarkMode = isDarkMode
+        
+        // 使用传入的颜色或默认颜色
+        self.bgColor = bgColor ?? (isDarkMode ? UIColor(red: 0.075, green: 0.090, blue: 0.137, alpha: 1.0) : UIColor.white)
+        self.kLineColor = kLineColor ?? UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)
+        self.xyLineColor = xyLineColor ?? UIColor.gray.withAlphaComponent(0.5)
+        self.gridColor = gridColor ?? UIColor.gray.withAlphaComponent(0.2)
+        self.kLineShadowColors = kLineShadowColors ?? [
+            (kLineColor ?? UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)).withAlphaComponent(0.6),
+            (kLineColor ?? UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)).withAlphaComponent(0.1)
+        ]
+        self.ma5Color = ma5Color ?? UIColor.yellow.withAlphaComponent(0.6)
+        self.ma10Color = ma10Color ?? UIColor.systemPink.withAlphaComponent(0.6)
+        self.ma30Color = ma30Color ?? UIColor.purple.withAlphaComponent(0.6)
+        self.upColor = upColor ?? UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0)
+        self.downColor = downColor ?? UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)
+        self.volColor = volColor ?? UIColor(red: 0.278, green: 0.161, blue: 0.682, alpha: 1.0)
+        self.macdColor = macdColor ?? UIColor(red: 0.278, green: 0.161, blue: 0.682, alpha: 1.0)
+        self.difColor = difColor ?? UIColor(red: 0.788, green: 0.722, blue: 0.522, alpha: 1.0)
+        self.deaColor = deaColor ?? UIColor(red: 0.424, green: 0.690, blue: 0.651, alpha: 1.0)
+        self.kColor = kColor ?? UIColor(red: 0.788, green: 0.722, blue: 0.522, alpha: 1.0)
+        self.dColor = dColor ?? UIColor(red: 0.424, green: 0.690, blue: 0.651, alpha: 1.0)
+        self.jColor = jColor ?? UIColor(red: 0.600, green: 0.475, blue: 0.776, alpha: 1.0)
+        self.rsiColor = rsiColor ?? UIColor(red: 0.788, green: 0.722, blue: 0.522, alpha: 1.0)
+        self.yAxisTextColor = yAxisTextColor ?? (isDarkMode ? UIColor.white : UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0))
+        self.xAxisTextColor = xAxisTextColor ?? (isDarkMode ? UIColor.white : UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0))
+        self.selectedPriceTextColor = selectedPriceTextColor ?? UIColor.white
+        self.selectedPriceTextBgColor = selectedPriceTextBgColor ?? UIColor.black
+        self.maxMinTextColor = maxMinTextColor ?? (isDarkMode ? UIColor.white : UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0))
+        self.depthBuyColor = depthBuyColor ?? UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 1.0)
+        self.depthSellColor = depthSellColor ?? UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 1.0)
+        self.depthSellColors = depthSellColors ?? [
+            UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 0.08),
+            UIColor(red: 0.988, green: 0.376, blue: 0.376, alpha: 0.004)
+        ]
+        self.depthBuyColors = depthBuyColors ?? [
+            UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 0.08),
+            UIColor(red: 0.220, green: 0.898, blue: 0.800, alpha: 0.004)
+        ]
+        self.depthTextColor = depthTextColor ?? (isDarkMode ? UIColor.white : UIColor.black)
+        self.markerBorderColor = markerBorderColor ?? UIColor(red: 0.424, green: 0.478, blue: 0.525, alpha: 1.0)
+        self.markerBgColor = markerBgColor ?? UIColor(red: 0.051, green: 0.090, blue: 0.133, alpha: 1.0)
+        self.realTimeBgColor = realTimeBgColor ?? self.kLineColor
+        self.rightRealTimeTextColor = rightRealTimeTextColor ?? UIColor.white
+        self.realTimeTextBorderColor = realTimeTextBorderColor ?? UIColor(red: 0.424, green: 0.478, blue: 0.525, alpha: 1.0)
+        self.realTimeTextColor = realTimeTextColor ?? UIColor.white
+        self.realTimeLineColor = realTimeLineColor ?? self.kLineColor
+        self.realTimeLongLineColor = realTimeLongLineColor ?? self.kLineColor
+        self.pointColor = pointColor ?? UIColor.white
+    }
+    
+    // 便捷方法：应用预设主题
+    public func applyLightTheme() {
+        self.bgColor = UIColor.white
+        self.yAxisTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+        self.xAxisTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+        self.maxMinTextColor = UIColor(red: 0.376, green: 0.451, blue: 0.557, alpha: 1.0)
+        self.depthTextColor = UIColor.black
+    }
+    
+    public func applyDarkTheme() {
+        self.bgColor = UIColor(red: 0.075, green: 0.090, blue: 0.137, alpha: 1.0)
+        self.yAxisTextColor = UIColor.white
+        self.xAxisTextColor = UIColor.white
+        self.maxMinTextColor = UIColor.white
+        self.depthTextColor = UIColor.white
+    }
+    
+    public func applyBinanceTheme() {
+        // 应用币安主题颜色
+        self.upColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色上涨
+        self.downColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色下跌
+        self.ma5Color = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
+        self.ma10Color = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
+        self.ma30Color = UIColor(red: 0.0, green: 0.5, blue: 1.0, alpha: 1.0) // 蓝色
+        self.difColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
+        self.deaColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
+        self.kColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
+        self.dColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
+        self.jColor = UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // 粉色
+        self.rsiColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
+        self.volColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色
+        self.depthBuyColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha: 1.0) // #33D587 绿色
+        self.depthSellColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色
+    }
+}
+
+
 // MARK: - 图表配置管理器
 /// 图表配置类，支持完全自定义所有样式参数
 /// 使用方式：
@@ -26,6 +267,7 @@ public class ChartConfiguration {
         self.infoPanelTexts = ChartConfiguration.infoPanelPreset(.zhHans)
         self.infoPanelStyle = InfoPanelStyle()
         self.emaStyle = EMAStyle()
+        self.chartStyleConfig = ChartStyleConfig()
         self.numberFractionDigits = 2
     }
     
@@ -46,6 +288,7 @@ public class ChartConfiguration {
     ///   - infoPanelTexts: 信息面板文本
     ///   - infoPanelStyle: 信息面板样式
     ///   - emaStyle: EMA样式
+    ///   - chartStyleConfig: 图表样式配置
     ///   - numberFractionDigits: 数字小数位数
     public init(
         candleStyle: CandleStyle = CandleStyle(),
@@ -63,6 +306,7 @@ public class ChartConfiguration {
         infoPanelTexts: InfoPanelTexts = ChartConfiguration.infoPanelPreset(.zhHans),
         infoPanelStyle: InfoPanelStyle = InfoPanelStyle(),
         emaStyle: EMAStyle = EMAStyle(),
+        chartStyleConfig: ChartStyleConfig = ChartStyleConfig(),
         numberFractionDigits: Int = 2
     ) {
         self.candleStyle = candleStyle
@@ -80,6 +324,7 @@ public class ChartConfiguration {
         self.infoPanelTexts = infoPanelTexts
         self.infoPanelStyle = infoPanelStyle
         self.emaStyle = emaStyle
+        self.chartStyleConfig = chartStyleConfig
         self.numberFractionDigits = numberFractionDigits
     }
     
@@ -341,6 +586,84 @@ public class ChartConfiguration {
         public init() {}
     }
     
+    // MARK: - 图表样式配置（新增）
+    public struct ChartStyleConfig {
+        // 点与点的距离
+        public var pointWidth: Double = 8.0
+        
+        // 蜡烛宽度
+        public var candleWidth: Double = 6.0
+        
+        // 蜡烛中间线的宽度
+        public var candleLineWidth: Double = 0.8
+        
+        // 成交量柱子宽度
+        public var volWidth: Double = 6.5
+        
+        // MACD柱子宽度
+        public var macdWidth: Double = 6.5
+        
+        // 垂直交叉线宽度
+        public var vCrossWidth: Double = 0.5
+        
+        // 水平交叉线宽度
+        public var hCrossWidth: Double = 0.5
+        
+        // 网格
+        public var gridRows: Int = 2
+        public var gridColumns: Int = 3
+        
+        // 网格线宽
+        public var gridStrokeWidth: Double = 0.5
+        
+        public var topPadding: Double = 15.0
+        public var bottomDateHigh: Double = 15.0
+        public var childPadding: Double = 15.0
+        
+        public var defaultTextSize: Double = 9.0
+        
+        // 曲线宽度
+        public var lineStrokeWidth: Double = 1.0
+        
+        // 虚线宽度
+        public var dashWidth: Double = 4.0
+        
+        // 虚线之间间距
+        public var dashSpace: Double = 4.0
+        
+        // 是否显示虚线
+        public var isShowDashLine: Bool = true
+        
+        // 单个副图的最大高度比例（相对于总显示高度的比例，0.0-1.0）
+        // 例如：0.15 表示每个副图最多占据15%的高度
+        public var singleSecondaryMaxHeightRatio: Double = 0.15
+        
+        // 实时价格样式
+        public struct RealTimePriceStyle {
+            public var lineColor: UIColor = UIColor.black
+            public var dashWidth: Double = 4
+            public var dashSpace: Double = 4
+            public var dashLineWidth: Double = 0.5  // 虚线宽度
+            public var labelTextColor: UIColor = UIColor.black
+            public var labelBgColor: UIColor = UIColor.white
+            public var labelBorderColor: UIColor = UIColor.black
+            public var labelCornerRadius: Double = 2.0
+            public var labelTextPadding: Double = 6.0
+            public var labelExtraHeight: Double = 8.0
+            public var triangleWidth: Double = 5.0
+            public var triangleHeight: Double = 8.0
+            // 右侧内边距（增大蜡烛与实时价格的间距）
+            public var rightInset: Double = 40.0
+            // 右侧实时价格点击热区（像素），用于点击后回到最右
+            public var tapHotZoneWidth: Double = 80.0
+            
+            public init() {}
+        }
+        public var realTimePriceStyle: RealTimePriceStyle = RealTimePriceStyle()
+        
+        public init() {}
+    }
+    
     // MARK: - 配置实例（所有属性均可外部修改）
     /// 蜡烛图样式配置
     public var candleStyle: CandleStyle
@@ -372,6 +695,8 @@ public class ChartConfiguration {
     public var infoPanelStyle: InfoPanelStyle
     /// EMA样式配置
     public var emaStyle: EMAStyle
+    /// 图表样式配置
+    public var chartStyleConfig: ChartStyleConfig
     /// 数字格式：全局小数位（价格/指标等），可外部配置
     public var numberFractionDigits: Int
 

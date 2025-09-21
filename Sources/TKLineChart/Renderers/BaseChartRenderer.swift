@@ -16,7 +16,7 @@ public protocol BaseChartRenderer {
     func drawText(_ canvas: CGContext, data: DataType, x: Double)
     func drawRightText(_ canvas: CGContext, textStyle: [NSAttributedString.Key: Any], gridRows: Int)
     func drawChart(_ lastPoint: DataType, _ curPoint: DataType, lastX: Double, curX: Double, size: CGSize, canvas: CGContext)
-    func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor)
+    func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor, lineWidth: Double)
 }
 
 // MARK: - 基础图表渲染器实现
@@ -70,12 +70,12 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
         // 子类实现
     }
     
-    public func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor) {
+    public func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor, lineWidth: Double = 1.0) {
         let lastY = getY(lastPrice)
         let curY = getY(curPrice)
         
         canvas.setStrokeColor(color.cgColor)
-        canvas.setLineWidth(1.0)
+        canvas.setLineWidth(CGFloat(lineWidth))  // 使用传入的线条宽度
         canvas.setLineCap(.round)  // 设置线条端点为圆形，避免裂缝
         canvas.setLineJoin(.round) // 设置线条连接点为圆形，避免折角裂缝
         canvas.move(to: CGPoint(x: lastX, y: lastY))

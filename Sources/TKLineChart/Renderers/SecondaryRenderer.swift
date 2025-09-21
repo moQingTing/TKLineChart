@@ -3,15 +3,13 @@ import UIKit
 public class SecondaryRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     private let secondaryState: SecondaryState
     private let chartColors: ChartColors
-    private let chartStyle: ChartStyle
     private let chartConfiguration: ChartConfiguration
     
     public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double,
-                secondaryState: SecondaryState, chartStyle: ChartStyle, chartColors: ChartColors,
+                secondaryState: SecondaryState, chartColors: ChartColors,
                 chartConfiguration: ChartConfiguration) {
         self.secondaryState = secondaryState
         self.chartColors = chartColors
-        self.chartStyle = chartStyle
         self.chartConfiguration = chartConfiguration
         
         super.init(chartRect: chartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding)
@@ -54,8 +52,8 @@ canvas: CGContext, lastX: Double, curX: Double) {
         canvas.setStrokeColor(color.cgColor)
         canvas.setLineWidth(1.0)
         
-        let rect = CGRect(x: curX - chartStyle.macdWidth / 2, y: macdY, 
-                         width: chartStyle.macdWidth, height: abs(macdHeight))
+        let rect = CGRect(x: curX - chartConfiguration.macdStyle.barWidth / 2, y: macdY, 
+                         width: chartConfiguration.macdStyle.barWidth, height: abs(macdHeight))
         
         if shouldBeHollow {
             // 空心柱状图（只画边框）
@@ -67,23 +65,23 @@ canvas: CGContext, lastX: Double, curX: Double) {
         
         // 绘制DIF和DEA线
         if lastPoint.dif != 0 {
-            drawLine(lastPoint.dif, curPoint.dif, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.macdStyle.difColor)
+            drawLine(lastPoint.dif, curPoint.dif, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.macdStyle.difColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
         if lastPoint.dea != 0 {
-            drawLine(lastPoint.dea, curPoint.dea, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.macdStyle.deaColor)
+            drawLine(lastPoint.dea, curPoint.dea, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.macdStyle.deaColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
     private func drawKDJ(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
                         canvas: CGContext, lastX: Double, curX: Double) {
         if lastPoint.k != 0 {
-            drawLine(lastPoint.k, curPoint.k, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.kdjStyle.kColor)
+            drawLine(lastPoint.k, curPoint.k, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.kdjStyle.kColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
         if lastPoint.d != 0 {
-            drawLine(lastPoint.d, curPoint.d, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.kdjStyle.dColor)
+            drawLine(lastPoint.d, curPoint.d, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.kdjStyle.dColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
         if lastPoint.j != 0 {
-            drawLine(lastPoint.j, curPoint.j, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.kdjStyle.jColor)
+            drawLine(lastPoint.j, curPoint.j, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.kdjStyle.jColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
@@ -91,14 +89,14 @@ canvas: CGContext, lastX: Double, curX: Double) {
                         canvas: CGContext, lastX: Double, curX: Double, period: Int) {
         let color = chartConfiguration.rsiStyle.rsiColors[period] ?? chartConfiguration.rsiStyle.rsi6Color
         if lastPoint.rsi != 0 || curPoint.rsi != 0 {
-            drawLine(lastPoint.rsi, curPoint.rsi, canvas: canvas, lastX: lastX, curX: curX, color: color)
+            drawLine(lastPoint.rsi, curPoint.rsi, canvas: canvas, lastX: lastX, curX: curX, color: color, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
     private func drawWR(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
                        canvas: CGContext, lastX: Double, curX: Double) {
         if lastPoint.r != 0 {
-            drawLine(lastPoint.r, curPoint.r, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.williamsRStyle.lineColor)
+            drawLine(lastPoint.r, curPoint.r, canvas: canvas, lastX: lastX, curX: curX, color: chartConfiguration.williamsRStyle.lineColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
@@ -112,8 +110,8 @@ canvas: CGContext, lastX: Double, curX: Double) {
         let color = curPoint.close >= curPoint.open ? chartConfiguration.volumeStyle.upColor : chartConfiguration.volumeStyle.downColor
         
         canvas.setFillColor(color.cgColor)
-        let rect = CGRect(x: curX - chartStyle.volWidth / 2, y: volumeY,
-                         width: chartStyle.volWidth, height: volumeHeight)
+        let rect = CGRect(x: curX - chartConfiguration.volumeStyle.barWidth / 2, y: volumeY,
+                         width: chartConfiguration.volumeStyle.barWidth, height: volumeHeight)
         canvas.fill(rect)
         
         // 绘制成交量MA线（参数化）
@@ -121,12 +119,12 @@ canvas: CGContext, lastX: Double, curX: Double) {
         let lastV1 = lastPoint.volumeMAs[p1] ?? 0
         let curV1 = curPoint.volumeMAs[p1] ?? 0
         if p1 > 0, lastV1 != 0 || curV1 != 0 {
-            drawLine(lastV1, curV1, canvas: canvas, lastX: lastX, curX: curX, color: colors[p1] ?? chartConfiguration.volumeStyle.ma5Color)
+            drawLine(lastV1, curV1, canvas: canvas, lastX: lastX, curX: curX, color: colors[p1] ?? chartConfiguration.volumeStyle.ma5Color, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
         let lastV2 = lastPoint.volumeMAs[p2] ?? 0
         let curV2 = curPoint.volumeMAs[p2] ?? 0
         if p2 > 0, lastV2 != 0 || curV2 != 0 {
-            drawLine(lastV2, curV2, canvas: canvas, lastX: lastX, curX: curX, color: colors[p2] ?? chartConfiguration.volumeStyle.ma10Color)
+            drawLine(lastV2, curV2, canvas: canvas, lastX: lastX, curX: curX, color: colors[p2] ?? chartConfiguration.volumeStyle.ma10Color, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
@@ -137,34 +135,34 @@ canvas: CGContext, lastX: Double, curX: Double) {
         case .macd:
             if data.dif != 0 {
                 let text = NSAttributedString(string: "DIF:\(format(data.dif, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.difColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.difColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.dea != 0 {
                 let text = NSAttributedString(string: "DEA:\(format(data.dea, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.deaColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.deaColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.macd != 0 {
                 let text = NSAttributedString(string: "MACD:\(format(data.macd, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.macdColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.macdColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             
         case .kdj:
             if data.k != 0 {
                 let text = NSAttributedString(string: "K:\(format(data.k, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.kColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.kColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.d != 0 {
                 let text = NSAttributedString(string: "D:\(format(data.d, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.dColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.dColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.j != 0 {
                 let text = NSAttributedString(string: "J:\(format(data.j, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.jColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.jColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             
@@ -172,21 +170,21 @@ canvas: CGContext, lastX: Double, curX: Double) {
             if data.rsi != 0 {
                 let color = chartConfiguration.rsiStyle.rsiColors[period] ?? chartColors.rsiColor
                 let text = NSAttributedString(string: "RSI(\(period)):\(format(data.rsi, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(color, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             
         case let .wr(period):
             if data.r != 0 {
                 let text = NSAttributedString(string: "WR(\(period)):\(format(data.r, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.rsiColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.rsiColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             
         case let .vol(p1, p2):
             // VOL 当前成交量
             let volText = NSAttributedString(string: "VOL: \(NumberUtil.volFormat(data.volume, chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.volColor, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.volColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
             textComponents.append(volText)
 
             // 成交量MA(p1)
@@ -194,7 +192,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
             if p1 > 0, v1 != 0 {
                 let color1 = chartConfiguration.volumeStyle.maColors[p1] ?? chartConfiguration.volumeStyle.ma5Color
                 let ma1Text = NSAttributedString(string: "MA(\(p1)): \(NumberUtil.volFormat(v1, chartConfiguration.numberFractionDigits))    ",
-                                                attributes: getTextStyle(color1, fontSize: chartStyle.defaultTextSize))
+                                                attributes: getTextStyle(color1, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(ma1Text)
             }
 
@@ -203,7 +201,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
             if p2 > 0, v2 != 0 {
                 let color2 = chartConfiguration.volumeStyle.maColors[p2] ?? chartConfiguration.volumeStyle.ma10Color
                 let ma2Text = NSAttributedString(string: "MA(\(p2)): \(NumberUtil.volFormat(v2, chartConfiguration.numberFractionDigits))    ",
-                                                attributes: getTextStyle(color2, fontSize: chartStyle.defaultTextSize))
+                                                attributes: getTextStyle(color2, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(ma2Text)
             }
         }

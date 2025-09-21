@@ -37,7 +37,6 @@ open class BaseChartPainter {
     public var pointWidth: Double = 0.0
     public var marginRight: Double = 0.0
     
-    public let chartStyle: ChartStyle
     
     // 时间格式化
     public var formats: [String] = [
@@ -46,18 +45,17 @@ open class BaseChartPainter {
     ]
     
     public init(datas: [CompleteKLineEntity]?, scaleX: Double, scrollX: Double, isLongPress: Bool, 
-                selectX: Double, chartStyle: ChartStyle, mainState: MainState = .none, isLine: Bool = false) {
+                selectX: Double, mainState: MainState = .none, isLine: Bool = false) {
         self.datas = datas
         self.scaleX = scaleX
         self.scrollX = scrollX
         self.isLongPress = isLongPress
         self.selectX = selectX
-        self.chartStyle = chartStyle
         self.mainState = mainState
         self.isLine = isLine
         
         self.itemCount = datas?.count ?? 0
-        self.pointWidth = chartStyle.pointWidth
+        self.pointWidth = 8.0  // 默认值
         self.dataLen = Double(itemCount) * pointWidth
         initFormats()
     }
@@ -288,7 +286,7 @@ open class BaseChartPainter {
     
     public func getTextStyle(_ color: UIColor) -> [NSAttributedString.Key: Any] {
         return [
-            .font: UIFont.systemFont(ofSize: CGFloat(chartStyle.defaultTextSize)),
+            .font: UIFont.systemFont(ofSize: 9.0),  // 默认字体大小
             .foregroundColor: color
         ]
     }

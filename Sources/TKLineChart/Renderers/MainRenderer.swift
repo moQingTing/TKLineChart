@@ -6,22 +6,20 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     private let state: MainState
     private let isLine: Bool
     private let chartColors: ChartColors
-    private let chartStyle: ChartStyle
     private let chartConfiguration: ChartConfiguration
     
     private let contentPadding: Double = 12.0
     
     public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double, 
-                state: MainState, isLine: Bool, chartStyle: ChartStyle, chartColors: ChartColors,
+                state: MainState, isLine: Bool, chartColors: ChartColors,
                 chartConfiguration: ChartConfiguration) {
         self.state = state
         self.isLine = isLine
         self.chartColors = chartColors
-        self.chartStyle = chartStyle
         self.chartConfiguration = chartConfiguration
         
         // 为指标参数预留上padding空间，去掉底部留白
-        let textPadding = chartStyle.defaultTextSize + 4.0
+        let textPadding = chartConfiguration.chartStyleConfig.defaultTextSize + 4.0
         let adjustedChartRect = CGRect(
             x: chartRect.minX,
             y: chartRect.minY + CGFloat(textPadding),
@@ -31,8 +29,8 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         
         super.init(chartRect: adjustedChartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding)
         
-        self.candleWidth = chartStyle.candleWidth
-        self.candleLineWidth = chartStyle.candleLineWidth
+        self.candleWidth = chartConfiguration.chartStyleConfig.candleWidth
+        self.candleLineWidth = chartConfiguration.chartStyleConfig.candleLineWidth
         
         // 调整Y轴范围，增加内容边距
         let diff = maxValue - minValue
@@ -57,8 +55,8 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             for period in periods {
                 guard period > 0, let v = data.maPrices[period], v != 0 else { continue }
                 let color = maColors[period] ?? chartColors.kLineColor
-                let text = NSAttributedString(string: "MA(\(period)):\(format(v, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(color, fontSize: chartStyle.defaultTextSize))
+                    let text = NSAttributedString(string: "MA(\(period)):\(format(v, fractionDigits: chartConfiguration.numberFractionDigits))    ",
+                                                attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
         case let .ema(p1, p2, p3):
@@ -67,24 +65,24 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             for period in periods {
                 guard period > 0, let v = data.emaPrices[period], v != 0 else { continue }
                 let color = colors[period] ?? chartColors.kLineColor
-                let text = NSAttributedString(string: "EMA(\(period)):\(format(v, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(color, fontSize: chartStyle.defaultTextSize))
+                    let text = NSAttributedString(string: "EMA(\(period)):\(format(v, fractionDigits: chartConfiguration.numberFractionDigits))    ",
+                                                attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
         case .boll:
             if data.mb != 0 {
-                let text = NSAttributedString(string: "BOLL:\(format(data.mb, fractionDigits: chartConfiguration.numberFractionDigits))    ", 
-                                            attributes: getTextStyle(chartColors.ma5Color, fontSize: chartStyle.defaultTextSize))
+                let text = NSAttributedString(string: "BOLL:\(format(data.mb, fractionDigits: chartConfiguration.numberFractionDigits))    ",
+                                            attributes: getTextStyle(chartColors.ma5Color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.up != 0 {
                 let text = NSAttributedString(string: "UP:\(format(data.up, fractionDigits: chartConfiguration.numberFractionDigits))    ", 
-                                            attributes: getTextStyle(chartColors.ma10Color, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.ma10Color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.dn != 0 {
                 let text = NSAttributedString(string: "LB:\(format(data.dn, fractionDigits: chartConfiguration.numberFractionDigits))    ", 
-                                            attributes: getTextStyle(chartColors.ma30Color, fontSize: chartStyle.defaultTextSize))
+                                            attributes: getTextStyle(chartColors.ma30Color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
         case .none:
@@ -101,7 +99,7 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         let textSize = combinedText.size()
         
         // 指标参数显示在预留的padding区域中
-        let textPadding = chartStyle.defaultTextSize + 4.0
+        let textPadding = chartConfiguration.chartStyleConfig.defaultTextSize + 4.0
         
         // 顶部指标参数：显示在上padding区域
         let topY = Double(chartRect.minY) - textPadding + 2
@@ -176,13 +174,13 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         
         // 绘制线条
         canvas.setStrokeColor(chartColors.kLineColor.cgColor)
-        canvas.setLineWidth(CGFloat(chartStyle.lineStrokeWidth))
+        canvas.setLineWidth(CGFloat(chartConfiguration.chartStyleConfig.lineStrokeWidth))
         canvas.addPath(path)
         canvas.strokePath()
     }
     
     // 带颜色参数的drawLine方法，用于绘制MA、EMA等指标线
-    public override func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor) {
+    public override func drawLine(_ lastPrice: Double, _ curPrice: Double, canvas: CGContext, lastX: Double, curX: Double, color: UIColor, lineWidth: Double = 1.0) {
         let lastY = getY(lastPrice)
         let curY = getY(curPrice)
         
@@ -191,7 +189,7 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         let clampedCurY = max(Double(chartRect.minY), min(Double(chartRect.maxY), curY))
         
         canvas.setStrokeColor(color.cgColor)
-        canvas.setLineWidth(CGFloat(chartStyle.lineStrokeWidth))
+        canvas.setLineWidth(CGFloat(lineWidth))  // 使用传入的线条宽度
         canvas.setLineCap(.round)  // 设置线条端点为圆形，避免裂缝
         canvas.setLineJoin(.round) // 设置线条连接点为圆形，避免折角裂缝
         canvas.move(to: CGPoint(x: lastX, y: clampedLastY))
@@ -206,7 +204,7 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             guard period > 0 else { continue }
             guard let lastV = lastPoint.maPrices[period], let curV = curPoint.maPrices[period], lastV != 0 && curV != 0 else { continue }
             let color = maColors[period] ?? chartColors.kLineColor
-            drawLine(lastV, curV, canvas: canvas, lastX: lastX, curX: curX, color: color)
+            drawLine(lastV, curV, canvas: canvas, lastX: lastX, curX: curX, color: color, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
 
@@ -217,7 +215,7 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             guard period > 0 else { continue }
             guard let lastV = lastPoint.emaPrices[period], let curV = curPoint.emaPrices[period], lastV != 0 && curV != 0 else { continue }
             let color = colors[period] ?? chartColors.kLineColor
-            drawLine(lastV, curV, canvas: canvas, lastX: lastX, curX: curX, color: color)
+            drawLine(lastV, curV, canvas: canvas, lastX: lastX, curX: curX, color: color, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
@@ -226,13 +224,13 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         let config = chartConfiguration
         
         if lastPoint.up != 0 {
-            drawLine(lastPoint.up, curPoint.up, canvas: canvas, lastX: lastX, curX: curX, color: config.bollingerBandsStyle.upperColor)
+            drawLine(lastPoint.up, curPoint.up, canvas: canvas, lastX: lastX, curX: curX, color: config.bollingerBandsStyle.upperColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
         if lastPoint.mb != 0 {
-            drawLine(lastPoint.mb, curPoint.mb, canvas: canvas, lastX: lastX, curX: curX, color: config.bollingerBandsStyle.middleColor)
+            drawLine(lastPoint.mb, curPoint.mb, canvas: canvas, lastX: lastX, curX: curX, color: config.bollingerBandsStyle.middleColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
         if lastPoint.dn != 0 {
-            drawLine(lastPoint.dn, curPoint.dn, canvas: canvas, lastX: lastX, curX: curX, color: config.bollingerBandsStyle.lowerColor)
+            drawLine(lastPoint.dn, curPoint.dn, canvas: canvas, lastX: lastX, curX: curX, color: config.bollingerBandsStyle.lowerColor, lineWidth: chartConfiguration.chartStyleConfig.lineStrokeWidth)
         }
     }
     
@@ -321,7 +319,7 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     
     public override func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int) {
         // 计算包含上padding的完整边框区域（去掉底部留白）
-        let textPadding = chartStyle.defaultTextSize + 4.0
+        let textPadding = chartConfiguration.chartStyleConfig.defaultTextSize + 4.0
         let fullRect = CGRect(
             x: chartRect.minX,
             y: chartRect.minY - CGFloat(textPadding),

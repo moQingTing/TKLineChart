@@ -35,13 +35,6 @@ public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
         }
     }
     
-    public var chartStyle: ChartStyle = ChartStyle() {
-        didSet {
-            if chartStyle !== oldValue {
-                setNeedsDisplay()
-            }
-        }
-    }
     
     public var chartConfiguration: ChartConfiguration = ChartConfiguration() {
         didSet {
@@ -144,7 +137,6 @@ public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
             selectX: selectX,
             selectY: selectY,
             chartColors: chartColors,
-            chartStyle: chartStyle,
             secondaryStates: secondaryStates,
             mainState: mainState,
             isLine: isLine,
