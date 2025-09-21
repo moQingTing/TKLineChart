@@ -72,17 +72,17 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         case .boll:
             if data.mb != 0 {
                 let text = NSAttributedString(string: "BOLL:\(format(data.mb, fractionDigits: chartConfiguration.numberFractionDigits))    ",
-                                            attributes: getTextStyle(chartColors.ma5Color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
+                                            attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.middleColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.up != 0 {
                 let text = NSAttributedString(string: "UP:\(format(data.up, fractionDigits: chartConfiguration.numberFractionDigits))    ", 
-                                            attributes: getTextStyle(chartColors.ma10Color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
+                                            attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.upperColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.dn != 0 {
                 let text = NSAttributedString(string: "LB:\(format(data.dn, fractionDigits: chartConfiguration.numberFractionDigits))    ", 
-                                            attributes: getTextStyle(chartColors.ma30Color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
+                                            attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.lowerColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
         case .none:

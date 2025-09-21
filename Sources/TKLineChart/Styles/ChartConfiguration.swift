@@ -391,11 +391,11 @@ public class ChartConfiguration {
     // MARK: - 布林带配置
     public struct BollingerBandsStyle {
         // 上轨颜色
-        public var upperColor: UIColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
+        public var upperColor: UIColor = UIColor(red: 0.4, green: 0.6, blue: 1.0, alpha: 1.0) // 柔和蓝色
         // 中轨颜色
-        public var middleColor: UIColor = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
+        public var middleColor: UIColor = UIColor(red: 0.6, green: 0.4, blue: 0.8, alpha: 1.0) // 柔和紫色
         // 下轨颜色
-        public var lowerColor: UIColor = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
+        public var lowerColor: UIColor = UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0) // 柔和橙色
         // 线宽
         public var lineWidth: Double = 1.0
         // 填充颜色透明度
@@ -788,6 +788,11 @@ public class ChartConfiguration {
         volumeStyle.downColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0) // #F5475E 红色
         volumeStyle.ma5Color = UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 1.0) // 黄色
         volumeStyle.ma10Color = UIColor(red: 0.8, green: 0.0, blue: 0.8, alpha: 1.0) // 紫色
+        
+        // 布林带颜色（使用更柔和的颜色）
+        bollingerBandsStyle.upperColor = UIColor(red: 0.4, green: 0.6, blue: 1.0, alpha: 1.0) // 柔和蓝色
+        bollingerBandsStyle.middleColor = UIColor(red: 0.6, green: 0.4, blue: 0.8, alpha: 1.0) // 柔和紫色
+        bollingerBandsStyle.lowerColor = UIColor(red: 0.8, green: 0.6, blue: 0.4, alpha: 1.0) // 柔和橙色
         
         backgroundStyle.backgroundColor = UIColor.white
         backgroundStyle.gridColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
