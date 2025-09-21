@@ -6,6 +6,32 @@
 > 
 > 🙏 **致谢**: 本项目参考了 [flutter_k_chart](https://github.com/gwhcn/flutter_k_chart) 的设计思路与实现方案，感谢原作者 [@gwhcn](https://github.com/gwhcn) 的贡献。
 
+## 示例与演示
+- 示例 App: `Examples/TKLineChartDemo`
+- 运行后可查看：
+  - 指标切换（主图单选、副图多选）
+  - 横屏全屏展示与滚动指标栏
+  - 模拟数据与实时更新
+
+### 应用截图
+
+<div align="center">
+  <img src="images/1.png" alt="K线图主界面" width="300" />
+  <img src="images/2.png" alt="K线图指标配置" width="300" />
+</div>
+
+<div align="center">
+  <img src="images/3.png" alt="K线图全屏模式" width="300" />
+  <img src="images/4.png" alt="K线图深度图" width="300" />
+</div>
+
+**功能展示：**
+- **图1**: K线图主界面，支持蜡烛图和线图切换，显示多种技术指标
+- **图2**: 指标配置界面，可自定义主图和副图指标参数
+- **图3**: 横屏全屏模式，提供更好的图表查看体验
+- **图4**: 深度图展示，显示买卖盘深度信息
+
+
 ### 兼容性
 - **iOS**: 13.0+
 - **Swift**: 5.7+
@@ -362,31 +388,6 @@ chartView.chartColors.bgColor = UIColor.black
 // 刷新图表显示
 chartView.setNeedsDisplay()
 ```
-
-## 示例与演示
-- 示例 App: `Examples/TKLineChartDemo`
-- 运行后可查看：
-  - 指标切换（主图单选、副图多选）
-  - 横屏全屏展示与滚动指标栏
-  - 模拟数据与实时更新
-
-### 应用截图
-
-<div align="center">
-  <img src="images/1.png" alt="K线图主界面" width="300" />
-  <img src="images/2.png" alt="K线图指标配置" width="300" />
-</div>
-
-<div align="center">
-  <img src="images/3.png" alt="K线图全屏模式" width="300" />
-  <img src="images/4.png" alt="K线图深度图" width="300" />
-</div>
-
-**功能展示：**
-- **图1**: K线图主界面，支持蜡烛图和线图切换，显示多种技术指标
-- **图2**: 指标配置界面，可自定义主图和副图指标参数
-- **图3**: 横屏全屏模式，提供更好的图表查看体验
-- **图4**: 深度图展示，显示买卖盘深度信息
 
 ## 贡献与支持
 - 欢迎提 Issue/PR，一起完善指标、性能和动画。
