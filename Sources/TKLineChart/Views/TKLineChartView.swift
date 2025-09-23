@@ -388,7 +388,7 @@ public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
 
 // MARK: - 手势代理：与 UITableView 垂直滚动解冲突
 extension TKLineChartView {
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    public override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         // 仅限制拖拽手势：横向才由图表处理；纵向交给父级（如 UITableView）
         if let pan = panGestureRecognizer, gestureRecognizer === pan {
             let v = pan.velocity(in: self)
