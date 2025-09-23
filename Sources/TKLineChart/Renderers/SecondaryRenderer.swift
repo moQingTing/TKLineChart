@@ -12,7 +12,16 @@ public class SecondaryRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         self.chartColors = chartColors
         self.chartConfiguration = chartConfiguration
         
-        super.init(chartRect: chartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding)
+        // 为副图指标文字预留顶部区域，避免与图形遮挡
+        let textPadding = chartConfiguration.chartStyleConfig.defaultTextSize + 4.0
+        let adjustedChartRect = CGRect(
+            x: chartRect.minX,
+            y: chartRect.minY + CGFloat(textPadding),
+            width: chartRect.width,
+            height: max(0, chartRect.height - CGFloat(textPadding))
+        )
+        
+        super.init(chartRect: adjustedChartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding)
     }
     
     public override func drawChart(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
@@ -216,8 +225,9 @@ canvas: CGContext, lastX: Double, curX: Double) {
         }
         
         let textSize = combinedText.size()
-        // 修复位置计算：在图表内部，贴着顶部网格线显示指标参数
-        let y = Double(chartRect.minY) + 2
+        // 将指标参数绘制在预留的顶部padding区域，避免与图形重叠
+        let textPadding = chartConfiguration.chartStyleConfig.defaultTextSize + 4.0
+        let y = Double(chartRect.minY) - textPadding + 2
         combinedText.draw(at: CGPoint(x: x, y: y))
     }
     
