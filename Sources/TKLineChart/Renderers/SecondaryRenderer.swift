@@ -103,14 +103,16 @@ canvas: CGContext, lastX: Double, curX: Double) {
     private func drawVolume(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
                            canvas: CGContext, lastX: Double, curX: Double, p1: Int, p2: Int) {
         // 绘制成交量柱状图
-        let volumeHeight = getY(0) - getY(curPoint.volume)
-        let volumeY = getY(curPoint.volume)
+        // 以副图底边作为基线，避免 getY(0) 在 minValue>0 时映射到图表区域外
+        let baseY = Double(chartRect.maxY)
+        let volumeTopY = getY(curPoint.volume)
+        let volumeHeight = max(0, baseY - volumeTopY)
         
         // 使用配置的颜色
         let color = curPoint.close >= curPoint.open ? chartConfiguration.volumeStyle.upColor : chartConfiguration.volumeStyle.downColor
         
         canvas.setFillColor(color.cgColor)
-        let rect = CGRect(x: curX - chartConfiguration.volumeStyle.barWidth / 2, y: volumeY,
+        let rect = CGRect(x: curX - chartConfiguration.volumeStyle.barWidth / 2, y: volumeTopY,
                          width: chartConfiguration.volumeStyle.barWidth, height: volumeHeight)
         canvas.fill(rect)
         
