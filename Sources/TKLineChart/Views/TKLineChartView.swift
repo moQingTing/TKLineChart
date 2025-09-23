@@ -386,6 +386,27 @@ public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
     
 }
 
+// MARK: - 手势代理：与 UITableView 垂直滚动解冲突
+extension TKLineChartView {
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 仅限制拖拽手势：横向才由图表处理；纵向交给父级（如 UITableView）
+        if let pan = panGestureRecognizer, gestureRecognizer === pan {
+            let v = pan.velocity(in: self)
+            return abs(v.x) > abs(v.y)
+        }
+        return true
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 拖拽手势不与其他手势并发，避免横向拖拽时表格也滚动
+        if let pan = panGestureRecognizer, (gestureRecognizer === pan || otherGestureRecognizer === pan) {
+            return false
+        }
+        // 其余手势可与父级滚动并存（例如点击/长按不阻塞表格滚动）
+        return true
+    }
+}
+
 // MARK: - 深度图视图
 public class TKDepthChartView: UIView {
     
