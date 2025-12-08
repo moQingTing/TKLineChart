@@ -432,8 +432,9 @@ public class ChartPainter: BaseChartPainter {
         let index = calculateSelectedX(selectX)
         guard let point = getItem(index) else { return }
         
-        // 交叉线统一用黑色
-        canvas.setStrokeColor(UIColor.black.cgColor)
+        // 使用配置的交叉线颜色
+        let crossLineColor = chartConfiguration.chartStyleConfig.crossLineColor
+        canvas.setStrokeColor(crossLineColor.cgColor)
         canvas.setLineWidth(CGFloat(chartConfiguration.chartStyleConfig.vCrossWidth))
         // 使用虚线样式
         if chartConfiguration.chartStyleConfig.dashWidth > 0 && chartConfiguration.chartStyleConfig.dashSpace > 0 {
@@ -461,9 +462,9 @@ public class ChartPainter: BaseChartPainter {
         canvas.addLine(to: CGPoint(x: -translateX + width / scaleX, y: y))
         canvas.strokePath()
         
-        // 绘制交叉点
-        // 点击点也用黑色
-        canvas.setFillColor(UIColor.black.cgColor)
+        // 绘制交叉点（使用配置的交叉点颜色）
+        let crossPointColor = chartConfiguration.chartStyleConfig.crossPointColor
+        canvas.setFillColor(crossPointColor.cgColor)
         canvas.fillEllipse(in: CGRect(x: x - 2, y: y - 2, width: 4, height: 4))
         // 取消虚线设置，避免影响后续绘制
         canvas.setLineDash(phase: 0, lengths: [])

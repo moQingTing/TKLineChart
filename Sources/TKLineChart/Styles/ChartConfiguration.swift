@@ -609,6 +609,12 @@ public class ChartConfiguration {
         // 水平交叉线宽度
         public var hCrossWidth: Double = 0.5
         
+        // 交叉线颜色（竖线和横线）
+        public var crossLineColor: UIColor = UIColor.black
+        
+        // 交叉点颜色
+        public var crossPointColor: UIColor = UIColor.black
+        
         // 网格
         public var gridRows: Int = 2
         public var gridColumns: Int = 3
