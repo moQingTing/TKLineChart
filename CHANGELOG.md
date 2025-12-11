@@ -101,10 +101,10 @@ chartView.chartConfiguration = chartConfiguration
 - ✅ 更新：`BaseChartRenderer.format(_ n: Double) -> NSAttributedString`（原返回 String）
 - ❌ 移除：`ChartConfiguration.numberFractionDigits: Int`
 - ❌ 移除：`format(_ n: Double, fractionDigits: Int)` 中的 `fractionDigits` 参数
+- ❌ 移除：`TKLineChartView.fractionDigits` 属性（请使用 `chartConfiguration.priceFormatter` 替代）
 
 **向后兼容性：**
-- `TKLineChartView.fractionDigits` 属性仍然可用，会自动转换为 `priceFormatter` 回调
-- 未设置格式化回调时，使用默认格式化行为（与之前一致）
+- 未设置格式化回调时，使用默认格式化行为（保留2位小数，与之前一致）
 
 **示例代码：**
 参考 `Examples/TKLineChartDemo` 中的 `SimpleExampleViewController` 和 `FullScreenChartViewController`。

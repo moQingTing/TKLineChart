@@ -446,12 +446,29 @@ chartColors.selectedPriceTextColor = UIColor.yellow
 
 ### 数字格式化配置
 ```swift
-// 设置小数位数
-chartConfiguration.numberFractionDigits = 2  // 价格显示2位小数
-chartConfiguration.numberFractionDigits = 4  // 价格显示4位小数
+// 使用格式化回调自定义价格显示格式（返回 NSAttributedString 支持样式）
+chartConfiguration.priceFormatter = { price in
+    let text = NumberUtil.format(price, 4)  // 保留4位小数
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
+}
 
-// 设置到图表
-chartView.numberFractionDigits = chartConfiguration.numberFractionDigits
+// 使用格式化回调自定义成交量显示格式
+chartConfiguration.volumeFormatter = { volume in
+    let text = NumberUtil.abbreviate(volume, 2)  // 保留2位小数，带缩写
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
+}
 ```
 
 ### 完整配置示例
@@ -468,12 +485,22 @@ config.candleStyle.upColor = UIColor(red: 0.2, green: 0.835, blue: 0.529, alpha:
 config.candleStyle.downColor = UIColor(red: 0.961, green: 0.278, blue: 0.369, alpha: 1.0)  // #F5475E
 config.chartStyleConfig.realTimePriceStyle.dashLineWidth = 1.5
 config.infoPanelStyle.cornerRadius = 8.0
-config.numberFractionDigits = 4
+// 配置价格格式化回调（保留4位小数）
+config.priceFormatter = { price in
+    let text = NumberUtil.format(price, 4)
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
+}
 
 // 应用到图表
 chartView.chartConfiguration = config
 chartView.chartColors = colors
-chartView.numberFractionDigits = config.numberFractionDigits
+// 格式化回调已通过 chartConfiguration 设置，无需额外配置
 ```
 
 ### 配置更新
