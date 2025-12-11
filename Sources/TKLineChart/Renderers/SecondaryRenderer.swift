@@ -145,34 +145,34 @@ canvas: CGContext, lastX: Double, curX: Double) {
         switch secondaryState {
         case .macd:
             if data.dif != 0 {
-                let text = NSAttributedString(string: "DIF:\(format(data.dif, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "DIF:\(format(data.dif))    ",
                                             attributes: getTextStyle(chartColors.difColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.dea != 0 {
-                let text = NSAttributedString(string: "DEA:\(format(data.dea, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "DEA:\(format(data.dea))    ",
                                             attributes: getTextStyle(chartColors.deaColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.macd != 0 {
-                let text = NSAttributedString(string: "MACD:\(format(data.macd, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "MACD:\(format(data.macd))    ",
                                             attributes: getTextStyle(chartColors.macdColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             
         case .kdj:
             if data.k != 0 {
-                let text = NSAttributedString(string: "K:\(format(data.k, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "K:\(format(data.k))    ",
                                             attributes: getTextStyle(chartColors.kColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.d != 0 {
-                let text = NSAttributedString(string: "D:\(format(data.d, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "D:\(format(data.d))    ",
                                             attributes: getTextStyle(chartColors.dColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             if data.j != 0 {
-                let text = NSAttributedString(string: "J:\(format(data.j, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "J:\(format(data.j))    ",
                                             attributes: getTextStyle(chartColors.jColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
@@ -180,14 +180,14 @@ canvas: CGContext, lastX: Double, curX: Double) {
         case let .rsi(period):
             if data.rsi != 0 {
                 let color = chartConfiguration.rsiStyle.rsiColors[period] ?? chartColors.rsiColor
-                let text = NSAttributedString(string: "RSI(\(period)):\(format(data.rsi, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "RSI(\(period)):\(format(data.rsi))    ",
                                             attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
             
         case let .wr(period):
             if data.r != 0 {
-                let text = NSAttributedString(string: "WR(\(period)):\(format(data.r, fractionDigits: 0))    ",
+                let text = NSAttributedString(string: "WR(\(period)):\(format(data.r))    ",
                                             attributes: getTextStyle(chartColors.rsiColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(text)
             }
@@ -238,7 +238,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
         // 顶部数值（最大值）
         let topPosition = 0.0
         let topValue = topPosition / scaleY + minValue
-        let topText = NSAttributedString(string: format(topValue, fractionDigits: 0), attributes: textStyle)
+        let topText = NSAttributedString(string: format(topValue), attributes: textStyle)
         let topTextSize = topText.size()
         let topY = Double(chartRect.minY) + 2
         topText.draw(at: CGPoint(x: Double(chartRect.width) - topTextSize.width, y: topY))
@@ -246,7 +246,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
         // 底部数值（最小值）
         let bottomPosition = Double(gridRows) * rowSpace
         let bottomValue = bottomPosition / scaleY + minValue
-        let bottomText = NSAttributedString(string: format(bottomValue, fractionDigits: 0), attributes: textStyle)
+        let bottomText = NSAttributedString(string: format(bottomValue), attributes: textStyle)
         let bottomTextSize = bottomText.size()
         let bottomY = Double(chartRect.maxY) - bottomTextSize.height - 2
         bottomText.draw(at: CGPoint(x: Double(chartRect.width) - bottomTextSize.width, y: bottomY))

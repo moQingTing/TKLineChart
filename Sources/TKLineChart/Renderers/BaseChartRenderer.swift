@@ -11,7 +11,7 @@ public protocol BaseChartRenderer {
     var chartRect: CGRect { get set }
     
     func getY(_ y: Double) -> Double
-    func format(_ n: Double, fractionDigits: Int) -> String
+    func format(_ n: Double) -> String
     func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int)
     func drawText(_ canvas: CGContext, data: DataType, x: Double)
     func drawRightText(_ canvas: CGContext, textStyle: [NSAttributedString.Key: Any], gridRows: Int)
@@ -54,7 +54,7 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
         return (maxValue - y) * scaleY + Double(chartRect.minY)
     }
     
-    public func format(_ n: Double, fractionDigits: Int) -> String {
+    public func format(_ n: Double) -> String {
         if let formatter = priceFormatter {
             return formatter(n)
         }

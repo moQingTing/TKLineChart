@@ -293,7 +293,7 @@ open class BaseChartPainter {
         ]
     }
     
-    public func format(_ n: Double, fractionDigits: Int = 2) -> String {
+    public func format(_ n: Double) -> String {
         if let formatter = priceFormatter {
             return formatter(n)
         }
