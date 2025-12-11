@@ -70,6 +70,17 @@ class SimpleExampleViewController: UIViewController {
         // MARK: - 配置相关
          let chartConfiguration = ChartConfiguration()
          chartConfiguration.applyBinanceTheme()
+         
+         // 配置价格格式化回调：保留4位小数
+         chartConfiguration.priceFormatter = { price in
+             return String(format: "%.4f", price)
+         }
+         
+         // 配置成交量格式化回调：保留2位小数，带缩写
+         chartConfiguration.volumeFormatter = { volume in
+             return NumberUtil.abbreviate(volume, 2)
+         }
+         
          self.kLineChartView.chartConfiguration = chartConfiguration
         // 页面显示后再异步加载数据
         if kLineData.isEmpty {
