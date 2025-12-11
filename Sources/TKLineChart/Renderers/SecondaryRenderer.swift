@@ -26,22 +26,31 @@ public class SecondaryRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     
     // 辅助方法：统一格式化文本的字体大小和颜色
     private func normalizeFormattedText(_ formatted: NSAttributedString, defaultColor: UIColor, fontSize: Double) -> NSAttributedString {
+        // 如果格式化文本为空，创建一个默认的空文本
+        guard formatted.length > 0 else {
+            return NSAttributedString(string: "", attributes: [
+                .font: UIFont.systemFont(ofSize: CGFloat(fontSize)),
+                .foregroundColor: defaultColor
+            ])
+        }
+        
         let mutable = NSMutableAttributedString(attributedString: formatted)
         let font = UIFont.systemFont(ofSize: CGFloat(fontSize))
         
-        // 统一设置字体大小
+        // 统一设置字体大小（覆盖所有现有字体设置）
         mutable.addAttribute(.font, value: font, range: NSRange(location: 0, length: mutable.length))
         
-        // 检查并设置颜色：如果格式化文本没有设置颜色，则使用默认颜色
+        // 检查整个文本是否有颜色属性
+        // 注意：enumerateAttribute 只会遍历已设置属性的范围，所以需要检查每个字符位置
         var hasColor = false
-        mutable.enumerateAttribute(.foregroundColor, in: NSRange(location: 0, length: mutable.length), options: []) { (value, range, stop) in
-            if value != nil {
+        for i in 0..<mutable.length {
+            if let _ = mutable.attribute(.foregroundColor, at: i, effectiveRange: nil) {
                 hasColor = true
-                stop.pointee = true
+                break
             }
         }
         
-        // 如果没有颜色，统一设置默认颜色
+        // 如果整个文本都没有颜色属性，统一设置默认颜色
         if !hasColor {
             mutable.addAttribute(.foregroundColor, value: defaultColor, range: NSRange(location: 0, length: mutable.length))
         }
