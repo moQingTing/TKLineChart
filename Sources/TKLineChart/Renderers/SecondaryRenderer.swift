@@ -194,7 +194,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
             
         case let .vol(p1, p2):
             // VOL 当前成交量
-            let volText = NSAttributedString(string: "VOL: \(NumberUtil.volFormat(data.volume, 2))    ",
+            let volText = NSAttributedString(string: "VOL: \(format(data.volume))    ",
                                             attributes: getTextStyle(chartColors.volColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
             textComponents.append(volText)
 
@@ -202,7 +202,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
             let v1 = data.volumeMAs[p1] ?? 0
             if p1 > 0, v1 != 0 {
                 let color1 = chartConfiguration.volumeStyle.maColors[p1] ?? chartConfiguration.volumeStyle.ma5Color
-                let ma1Text = NSAttributedString(string: "MA(\(p1)): \(NumberUtil.volFormat(v1, 2))    ",
+                let ma1Text = NSAttributedString(string: "MA(\(p1)): \(format(v1))    ",
                                                 attributes: getTextStyle(color1, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(ma1Text)
             }
@@ -211,7 +211,7 @@ canvas: CGContext, lastX: Double, curX: Double) {
             let v2 = data.volumeMAs[p2] ?? 0
             if p2 > 0, v2 != 0 {
                 let color2 = chartConfiguration.volumeStyle.maColors[p2] ?? chartConfiguration.volumeStyle.ma10Color
-                let ma2Text = NSAttributedString(string: "MA(\(p2)): \(NumberUtil.volFormat(v2, 2))    ",
+                let ma2Text = NSAttributedString(string: "MA(\(p2)): \(format(v2))    ",
                                                 attributes: getTextStyle(color2, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
                 textComponents.append(ma2Text)
             }
