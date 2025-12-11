@@ -4,6 +4,8 @@
 
 > 
 > 🙏 **致谢**: 本项目参考了 [flutter_k_chart](https://github.com/gwhcn/flutter_k_chart) 的设计思路与实现方案，感谢原作者 [@gwhcn](https://github.com/gwhcn) 的贡献。
+> 
+> 📝 **变更日志**: 查看 [CHANGELOG.md](CHANGELOG.md) 了解最新功能和 API 变更。
 
 ## 示例与演示
 - 示例 App: `Examples/TKLineChartDemo`
@@ -80,10 +82,18 @@ NSLayoutConstraint.activate([
 ```swift
 // 创建图表配置
 let chartConfiguration = ChartConfiguration()
-chartView.chartConfiguration = chartConfiguration
 
-// 设置数字小数位数
-chartView.numberFractionDigits = 2
+// 配置价格格式化回调（可选）
+chartConfiguration.priceFormatter = { price in
+    return String(format: "%.4f", price)  // 保留4位小数
+}
+
+// 配置成交量格式化回调（可选）
+chartConfiguration.volumeFormatter = { volume in
+    return NumberUtil.abbreviate(volume, 2)  // 保留2位小数，带k/M/B/T缩写
+}
+
+chartView.chartConfiguration = chartConfiguration
 
 // 主图：MA/EMA/BOLL 三选一（带参数）
 chartView.mainState = .ema(5, 10, 20)
@@ -174,6 +184,37 @@ chartColors.applyDarkTheme()     // 深色主题
 // 设置到图表
 chartView.chartConfiguration = chartConfiguration
 chartView.chartColors = chartColors
+```
+
+### 格式化配置
+```swift
+// 价格格式化回调：自定义价格显示格式
+chartConfiguration.priceFormatter = { price in
+    // 示例1：保留4位小数
+    return String(format: "%.4f", price)
+    
+    // 示例2：使用千分位分隔符
+    // return NumberUtil.format(price, 4)
+    
+    // 示例3：自定义格式（如添加货币符号）
+    // return "¥\(String(format: "%.2f", price))"
+}
+
+// 成交量格式化回调：自定义成交量和数量显示格式
+chartConfiguration.volumeFormatter = { volume in
+    // 示例1：使用默认缩写（k/M/B/T）
+    return NumberUtil.abbreviate(volume, 2)
+    
+    // 示例2：保留2位小数，不带缩写
+    // return NumberUtil.format(volume, 2)
+    
+    // 示例3：自定义格式
+    // return String(format: "%.0f", volume)
+}
+
+// 默认行为：
+// - 如果 priceFormatter 为 nil，价格默认保留 2 位小数
+// - 如果 volumeFormatter 为 nil，成交量默认保留 2 位小数，带 k/M/B/T 缩写
 ```
 
 ### 颜色配置
