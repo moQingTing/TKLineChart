@@ -29,8 +29,9 @@ public class ChartPainter: BaseChartPainter {
         super.init(datas: datas, scaleX: scaleX, scrollX: scrollX, isLongPress: isLongPress,
                   selectX: selectX, mainState: mainState, isLine: isLine)
         
-        // 传递价格格式化回调
+        // 传递价格和成交量格式化回调
         self.priceFormatter = chartConfiguration.priceFormatter
+        self.volumeFormatter = chartConfiguration.volumeFormatter
     }
     
     public override func initRect(_ size: CGSize) {
@@ -314,8 +315,8 @@ public class ChartPainter: BaseChartPainter {
         let changeColor = change >= 0 ? upColor : downColor
         let changeText = NSAttributedString(string: "\(format(change)) (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor))
         let amplitudeText = NSAttributedString(string: String(format: "%.2f%%", amplitudePct), attributes: getTextStyle(valueColor))
-        let volumeText = NSAttributedString(string: format(point.volume), attributes: getTextStyle(valueColor))
-        let amountText = NSAttributedString(string: format(point.amount), attributes: getTextStyle(valueColor))
+        let volumeText = NSAttributedString(string: formatVolume(point.volume), attributes: getTextStyle(valueColor))
+        let amountText = NSAttributedString(string: formatVolume(point.amount), attributes: getTextStyle(valueColor))
 
         let i18n = chartConfiguration.infoPanelTexts
         let labels = [

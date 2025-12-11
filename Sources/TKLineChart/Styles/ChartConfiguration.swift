@@ -269,6 +269,7 @@ public class ChartConfiguration {
         self.emaStyle = EMAStyle()
         self.chartStyleConfig = ChartStyleConfig()
         self.priceFormatter = nil
+        self.volumeFormatter = nil
     }
     
     /// 完全自定义初始化方法
@@ -290,6 +291,7 @@ public class ChartConfiguration {
     ///   - emaStyle: EMA样式
     ///   - chartStyleConfig: 图表样式配置
     ///   - priceFormatter: 价格格式化回调，nil 时使用默认格式化（保留2位小数）
+    ///   - volumeFormatter: 成交量/数量格式化回调，nil 时使用默认格式化（保留2位小数，带缩写）
     public init(
         candleStyle: CandleStyle = CandleStyle(),
         movingAverageStyle: MovingAverageStyle = MovingAverageStyle(),
@@ -307,7 +309,8 @@ public class ChartConfiguration {
         infoPanelStyle: InfoPanelStyle = InfoPanelStyle(),
         emaStyle: EMAStyle = EMAStyle(),
         chartStyleConfig: ChartStyleConfig = ChartStyleConfig(),
-        priceFormatter: ((Double) -> String)? = nil
+        priceFormatter: ((Double) -> String)? = nil,
+        volumeFormatter: ((Double) -> String)? = nil
     ) {
         self.candleStyle = candleStyle
         self.movingAverageStyle = movingAverageStyle
@@ -326,6 +329,7 @@ public class ChartConfiguration {
         self.emaStyle = emaStyle
         self.chartStyleConfig = chartStyleConfig
         self.priceFormatter = priceFormatter
+        self.volumeFormatter = volumeFormatter
     }
     
     // MARK: - 蜡烛样式配置
@@ -706,6 +710,9 @@ public class ChartConfiguration {
     /// 价格格式化回调：外部可自定义价格显示格式，参数为价格值，返回格式化后的字符串
     /// 如果为 nil，则使用默认格式化（保留2位小数）
     public var priceFormatter: ((Double) -> String)?
+    /// 成交量/数量格式化回调：外部可自定义成交量和数量显示格式，参数为数值，返回格式化后的字符串
+    /// 如果为 nil，则使用默认格式化（保留2位小数，带缩写：k/M/B/T）
+    public var volumeFormatter: ((Double) -> String)?
 
     // MARK: - 信息面板多语言预设
     public enum InfoPanelLocalePreset {

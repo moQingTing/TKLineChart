@@ -27,7 +27,7 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
             height: max(0, chartRect.height - CGFloat(textPadding))
         )
         
-        super.init(chartRect: adjustedChartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding, priceFormatter: chartConfiguration.priceFormatter)
+        super.init(chartRect: adjustedChartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding, priceFormatter: chartConfiguration.priceFormatter, volumeFormatter: chartConfiguration.volumeFormatter)
         
         self.candleWidth = chartConfiguration.chartStyleConfig.candleWidth
         self.candleLineWidth = chartConfiguration.chartStyleConfig.candleLineWidth

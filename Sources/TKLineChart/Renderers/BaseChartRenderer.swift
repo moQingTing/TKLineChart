@@ -31,15 +31,18 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
     
     // 价格格式化回调
     public var priceFormatter: ((Double) -> String)?
+    // 成交量/数量格式化回调
+    public var volumeFormatter: ((Double) -> String)?
     
     // 移除这些属性，因为CGContext不能作为实例变量存储
     
-    public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double, priceFormatter: ((Double) -> String)? = nil) {
+    public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double, priceFormatter: ((Double) -> String)? = nil, volumeFormatter: ((Double) -> String)? = nil) {
         self.chartRect = chartRect
         self.maxValue = maxValue
         self.minValue = minValue
         self.topPadding = topPadding
         self.priceFormatter = priceFormatter
+        self.volumeFormatter = volumeFormatter
         
         // 初始化完成
         
@@ -60,6 +63,14 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
         }
         // 默认格式化：保留2位小数
         return NumberUtil.format(n, 2)
+    }
+    
+    public func formatVolume(_ n: Double) -> String {
+        if let formatter = volumeFormatter {
+            return formatter(n)
+        }
+        // 默认格式化：保留2位小数，带缩写（k/M/B/T）
+        return NumberUtil.abbreviate(n, 2)
     }
     
     open func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int) {

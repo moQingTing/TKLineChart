@@ -39,6 +39,8 @@ open class BaseChartPainter {
     
     // 价格格式化回调
     public var priceFormatter: ((Double) -> String)?
+    // 成交量/数量格式化回调
+    public var volumeFormatter: ((Double) -> String)?
     
     // 时间格式化
     public var formats: [String] = [
@@ -299,5 +301,13 @@ open class BaseChartPainter {
         }
         // 默认格式化：保留2位小数
         return NumberUtil.format(n, 2)
+    }
+    
+    public func formatVolume(_ n: Double) -> String {
+        if let formatter = volumeFormatter {
+            return formatter(n)
+        }
+        // 默认格式化：保留2位小数，带缩写（k/M/B/T）
+        return NumberUtil.abbreviate(n, 2)
     }
 }
