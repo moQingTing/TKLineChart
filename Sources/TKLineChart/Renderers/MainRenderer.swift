@@ -10,6 +10,31 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
     
     private let contentPadding: Double = 12.0
     
+    // 辅助方法：统一格式化文本的字体大小和颜色
+    private func normalizeFormattedText(_ formatted: NSAttributedString, defaultColor: UIColor, fontSize: Double) -> NSAttributedString {
+        let mutable = NSMutableAttributedString(attributedString: formatted)
+        let font = UIFont.systemFont(ofSize: CGFloat(fontSize))
+        
+        // 统一设置字体大小
+        mutable.addAttribute(.font, value: font, range: NSRange(location: 0, length: mutable.length))
+        
+        // 检查并设置颜色：如果格式化文本没有设置颜色，则使用默认颜色
+        var hasColor = false
+        mutable.enumerateAttribute(.foregroundColor, in: NSRange(location: 0, length: mutable.length), options: []) { (value, range, stop) in
+            if value != nil {
+                hasColor = true
+                stop.pointee = true
+            }
+        }
+        
+        // 如果没有颜色，统一设置默认颜色
+        if !hasColor {
+            mutable.addAttribute(.foregroundColor, value: defaultColor, range: NSRange(location: 0, length: mutable.length))
+        }
+        
+        return mutable
+    }
+    
     public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double, 
                 state: MainState, isLine: Bool, chartColors: ChartColors,
                 chartConfiguration: ChartConfiguration) {
@@ -56,8 +81,9 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
                 guard period > 0, let v = data.maPrices[period], v != 0 else { continue }
                 let color = maColors[period] ?? chartColors.kLineColor
                 let formatted = format(v)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "MA(\(period)):", attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
@@ -68,30 +94,34 @@ public class MainRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
                 guard period > 0, let v = data.emaPrices[period], v != 0 else { continue }
                 let color = colors[period] ?? chartColors.kLineColor
                 let formatted = format(v)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "EMA(\(period)):", attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
         case .boll:
             if data.mb != 0 {
                 let formatted = format(data.mb)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartConfiguration.bollingerBandsStyle.middleColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "BOLL:", attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.middleColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.middleColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
             if data.up != 0 {
                 let formatted = format(data.up)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartConfiguration.bollingerBandsStyle.upperColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "UP:", attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.upperColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.upperColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
             if data.dn != 0 {
                 let formatted = format(data.dn)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartConfiguration.bollingerBandsStyle.lowerColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "LB:", attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.lowerColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartConfiguration.bollingerBandsStyle.lowerColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }

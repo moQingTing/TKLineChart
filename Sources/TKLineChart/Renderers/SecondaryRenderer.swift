@@ -24,6 +24,31 @@ public class SecondaryRenderer: BaseChartRendererImpl<CompleteKLineEntity> {
         super.init(chartRect: adjustedChartRect, maxValue: maxValue, minValue: minValue, topPadding: topPadding, priceFormatter: chartConfiguration.priceFormatter, volumeFormatter: chartConfiguration.volumeFormatter)
     }
     
+    // 辅助方法：统一格式化文本的字体大小和颜色
+    private func normalizeFormattedText(_ formatted: NSAttributedString, defaultColor: UIColor, fontSize: Double) -> NSAttributedString {
+        let mutable = NSMutableAttributedString(attributedString: formatted)
+        let font = UIFont.systemFont(ofSize: CGFloat(fontSize))
+        
+        // 统一设置字体大小
+        mutable.addAttribute(.font, value: font, range: NSRange(location: 0, length: mutable.length))
+        
+        // 检查并设置颜色：如果格式化文本没有设置颜色，则使用默认颜色
+        var hasColor = false
+        mutable.enumerateAttribute(.foregroundColor, in: NSRange(location: 0, length: mutable.length), options: []) { (value, range, stop) in
+            if value != nil {
+                hasColor = true
+                stop.pointee = true
+            }
+        }
+        
+        // 如果没有颜色，统一设置默认颜色
+        if !hasColor {
+            mutable.addAttribute(.foregroundColor, value: defaultColor, range: NSRange(location: 0, length: mutable.length))
+        }
+        
+        return mutable
+    }
+    
     public override func drawChart(_ lastPoint: CompleteKLineEntity, _ curPoint: CompleteKLineEntity,
                                  lastX: Double, curX: Double, size: CGSize, canvas: CGContext) {
         switch secondaryState {
@@ -146,22 +171,25 @@ canvas: CGContext, lastX: Double, curX: Double) {
         case .macd:
             if data.dif != 0 {
                 let formatted = format(data.dif)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.difColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "DIF:", attributes: getTextStyle(chartColors.difColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.difColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
             if data.dea != 0 {
                 let formatted = format(data.dea)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.deaColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "DEA:", attributes: getTextStyle(chartColors.deaColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.deaColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
             if data.macd != 0 {
                 let formatted = format(data.macd)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.macdColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "MACD:", attributes: getTextStyle(chartColors.macdColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.macdColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
@@ -169,22 +197,25 @@ canvas: CGContext, lastX: Double, curX: Double) {
         case .kdj:
             if data.k != 0 {
                 let formatted = format(data.k)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.kColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "K:", attributes: getTextStyle(chartColors.kColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.kColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
             if data.d != 0 {
                 let formatted = format(data.d)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.dColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "D:", attributes: getTextStyle(chartColors.dColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.dColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
             if data.j != 0 {
                 let formatted = format(data.j)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.jColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "J:", attributes: getTextStyle(chartColors.jColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.jColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
@@ -193,8 +224,9 @@ canvas: CGContext, lastX: Double, curX: Double) {
             if data.rsi != 0 {
                 let color = chartConfiguration.rsiStyle.rsiColors[period] ?? chartColors.rsiColor
                 let formatted = format(data.rsi)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "RSI(\(period)):", attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(color, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
@@ -202,8 +234,9 @@ canvas: CGContext, lastX: Double, curX: Double) {
         case let .wr(period):
             if data.r != 0 {
                 let formatted = format(data.r)
+                let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.rsiColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let text = NSMutableAttributedString(string: "WR(\(period)):", attributes: getTextStyle(chartColors.rsiColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                text.append(formatted)
+                text.append(normalizedFormatted)
                 text.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.rsiColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(text)
             }
@@ -211,8 +244,9 @@ canvas: CGContext, lastX: Double, curX: Double) {
         case let .vol(p1, p2):
             // VOL 当前成交量
             let formatted = formatVolume(data.volume)
+            let normalizedFormatted = normalizeFormattedText(formatted, defaultColor: chartColors.volColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
             let volText = NSMutableAttributedString(string: "VOL: ", attributes: getTextStyle(chartColors.volColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-            volText.append(formatted)
+            volText.append(normalizedFormatted)
             volText.append(NSAttributedString(string: "    ", attributes: getTextStyle(chartColors.volColor, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
             textComponents.append(volText)
 
@@ -221,8 +255,9 @@ canvas: CGContext, lastX: Double, curX: Double) {
             if p1 > 0, v1 != 0 {
                 let color1 = chartConfiguration.volumeStyle.maColors[p1] ?? chartConfiguration.volumeStyle.ma5Color
                 let formatted1 = formatVolume(v1)
+                let normalizedFormatted1 = normalizeFormattedText(formatted1, defaultColor: color1, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let ma1Text = NSMutableAttributedString(string: "MA(\(p1)): ", attributes: getTextStyle(color1, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                ma1Text.append(formatted1)
+                ma1Text.append(normalizedFormatted1)
                 ma1Text.append(NSAttributedString(string: "    ", attributes: getTextStyle(color1, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(ma1Text)
             }
@@ -232,8 +267,9 @@ canvas: CGContext, lastX: Double, curX: Double) {
             if p2 > 0, v2 != 0 {
                 let color2 = chartConfiguration.volumeStyle.maColors[p2] ?? chartConfiguration.volumeStyle.ma10Color
                 let formatted2 = formatVolume(v2)
+                let normalizedFormatted2 = normalizeFormattedText(formatted2, defaultColor: color2, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)
                 let ma2Text = NSMutableAttributedString(string: "MA(\(p2)): ", attributes: getTextStyle(color2, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize))
-                ma2Text.append(formatted2)
+                ma2Text.append(normalizedFormatted2)
                 ma2Text.append(NSAttributedString(string: "    ", attributes: getTextStyle(color2, fontSize: chartConfiguration.chartStyleConfig.defaultTextSize)))
                 textComponents.append(ma2Text)
             }
