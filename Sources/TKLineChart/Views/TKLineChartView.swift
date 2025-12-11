@@ -50,18 +50,6 @@ public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
         }
     }
     
-    public var fractionDigits: Int = 2 {
-        didSet {
-            if fractionDigits != oldValue {
-                // 设置价格格式化回调，保留指定小数位
-                chartConfiguration.priceFormatter = { [self] price in
-                    return NumberUtil.format(price, self.fractionDigits)
-                }
-                setNeedsDisplay()
-            }
-        }
-    }
-    
     // MARK: - 私有属性
     private var scaleX: Double = 1.0
     private var scrollX: Double = 0.0
