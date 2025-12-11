@@ -261,8 +261,10 @@ canvas: CGContext, lastX: Double, curX: Double) {
         let topPosition = 0.0
         let topValue = topPosition / scaleY + minValue
         var topText = format(topValue)
-        // 应用文本样式
-        topText = NSAttributedString(string: topText.string, attributes: textStyle)
+        // 应用文本样式（保留原有样式，只更新需要的属性）
+        let mutableTopText = NSMutableAttributedString(attributedString: topText)
+        mutableTopText.addAttributes(textStyle, range: NSRange(location: 0, length: topText.length))
+        topText = mutableTopText
         let topTextSize = topText.size()
         let topY = Double(chartRect.minY) + 2
         topText.draw(at: CGPoint(x: Double(chartRect.width) - topTextSize.width, y: topY))
@@ -271,8 +273,10 @@ canvas: CGContext, lastX: Double, curX: Double) {
         let bottomPosition = Double(gridRows) * rowSpace
         let bottomValue = bottomPosition / scaleY + minValue
         var bottomText = format(bottomValue)
-        // 应用文本样式
-        bottomText = NSAttributedString(string: bottomText.string, attributes: textStyle)
+        // 应用文本样式（保留原有样式，只更新需要的属性）
+        let mutableBottomText = NSMutableAttributedString(attributedString: bottomText)
+        mutableBottomText.addAttributes(textStyle, range: NSRange(location: 0, length: bottomText.length))
+        bottomText = mutableBottomText
         let bottomTextSize = bottomText.size()
         let bottomY = Double(chartRect.maxY) - bottomTextSize.height - 2
         bottomText.draw(at: CGPoint(x: Double(chartRect.width) - bottomTextSize.width, y: bottomY))

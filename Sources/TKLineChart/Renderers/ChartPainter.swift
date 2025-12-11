@@ -226,8 +226,10 @@ public class ChartPainter: BaseChartPainter {
         // 选中价格文字颜色：白色
         let textColor = chartColors.selectedPriceTextColor
         var text = format(selectedPrice)
-        // 应用选中价格文字颜色
-        text = NSAttributedString(string: text.string, attributes: getTextStyle(textColor))
+        // 应用选中价格文字颜色（保留原有样式，只更新颜色）
+        let mutableText = NSMutableAttributedString(attributedString: text)
+        mutableText.addAttributes(getTextStyle(textColor), range: NSRange(location: 0, length: text.length))
+        text = mutableText
         let textHeight = text.size().height
         let textWidth = text.size().width
         
@@ -311,13 +313,25 @@ public class ChartPainter: BaseChartPainter {
 
         let timeText = NSAttributedString(string: DataUtil.getDate(point.timestamp), attributes: getTextStyle(valueColor))
         var openText = format(point.open)
-        openText = NSAttributedString(string: openText.string, attributes: getTextStyle(valueColor))
+        // 保留原有样式，只更新颜色
+        let mutableOpenText = NSMutableAttributedString(attributedString: openText)
+        mutableOpenText.addAttributes(getTextStyle(valueColor), range: NSRange(location: 0, length: openText.length))
+        openText = mutableOpenText
+        
         var highText = format(point.high)
-        highText = NSAttributedString(string: highText.string, attributes: getTextStyle(valueColor))
+        let mutableHighText = NSMutableAttributedString(attributedString: highText)
+        mutableHighText.addAttributes(getTextStyle(valueColor), range: NSRange(location: 0, length: highText.length))
+        highText = mutableHighText
+        
         var lowText = format(point.low)
-        lowText = NSAttributedString(string: lowText.string, attributes: getTextStyle(valueColor))
+        let mutableLowText = NSMutableAttributedString(attributedString: lowText)
+        mutableLowText.addAttributes(getTextStyle(valueColor), range: NSRange(location: 0, length: lowText.length))
+        lowText = mutableLowText
+        
         var closeText = format(point.close)
-        closeText = NSAttributedString(string: closeText.string, attributes: getTextStyle(valueColor))
+        let mutableCloseText = NSMutableAttributedString(attributedString: closeText)
+        mutableCloseText.addAttributes(getTextStyle(valueColor), range: NSRange(location: 0, length: closeText.length))
+        closeText = mutableCloseText
         let changeColor = change >= 0 ? upColor : downColor
         let changeFormatted = format(change)
         let changeText = NSMutableAttributedString(attributedString: changeFormatted)
@@ -327,9 +341,15 @@ public class ChartPainter: BaseChartPainter {
         changeText.append(NSAttributedString(string: " (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor)))
         let amplitudeText = NSAttributedString(string: String(format: "%.2f%%", amplitudePct), attributes: getTextStyle(valueColor))
         var volumeText = formatVolume(point.volume)
-        volumeText = NSAttributedString(string: volumeText.string, attributes: getTextStyle(valueColor))
+        // 保留原有样式，只更新颜色
+        let mutableVolumeText = NSMutableAttributedString(attributedString: volumeText)
+        mutableVolumeText.addAttributes(getTextStyle(valueColor), range: NSRange(location: 0, length: volumeText.length))
+        volumeText = mutableVolumeText
+        
         var amountText = formatVolume(point.amount)
-        amountText = NSAttributedString(string: amountText.string, attributes: getTextStyle(valueColor))
+        let mutableAmountText = NSMutableAttributedString(attributedString: amountText)
+        mutableAmountText.addAttributes(getTextStyle(valueColor), range: NSRange(location: 0, length: amountText.length))
+        amountText = mutableAmountText
 
         let i18n = chartConfiguration.infoPanelTexts
         let labels = [
@@ -504,8 +524,10 @@ public class ChartPainter: BaseChartPainter {
         // 实时价格文字（使用样式配置）
         let rt = chartConfiguration.chartStyleConfig.realTimePriceStyle
         var text = format(point.close)
-        // 应用实时价格文字颜色
-        text = NSAttributedString(string: text.string, attributes: getTextStyle(rt.labelTextColor))
+        // 应用实时价格文字颜色（保留原有样式，只更新颜色）
+        let mutableText = NSMutableAttributedString(attributedString: text)
+        mutableText.addAttributes(getTextStyle(rt.labelTextColor), range: NSRange(location: 0, length: text.length))
+        text = mutableText
         let textPadding: Double = rt.labelTextPadding
         let y = mainRenderer?.getY(point.close) ?? 0
         
