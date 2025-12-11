@@ -53,7 +53,10 @@ public class TKLineChartView: UIView, UIGestureRecognizerDelegate {
     public var fractionDigits: Int = 2 {
         didSet {
             if fractionDigits != oldValue {
-                chartConfiguration.numberFractionDigits = fractionDigits
+                // 设置价格格式化回调，保留指定小数位
+                chartConfiguration.priceFormatter = { price in
+                    return NumberUtil.format(price, fractionDigits)
+                }
                 setNeedsDisplay()
             }
         }

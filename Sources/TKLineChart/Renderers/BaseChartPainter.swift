@@ -37,6 +37,8 @@ open class BaseChartPainter {
     public var pointWidth: Double = 0.0
     public var marginRight: Double = 0.0
     
+    // 价格格式化回调
+    public var priceFormatter: ((Double) -> String)?
     
     // 时间格式化
     public var formats: [String] = [
@@ -292,6 +294,10 @@ open class BaseChartPainter {
     }
     
     public func format(_ n: Double, fractionDigits: Int = 2) -> String {
-        return NumberUtil.format(n, fractionDigits)
+        if let formatter = priceFormatter {
+            return formatter(n)
+        }
+        // 默认格式化：保留2位小数
+        return NumberUtil.format(n, 2)
     }
 }
