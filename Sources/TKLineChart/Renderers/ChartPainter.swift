@@ -225,7 +225,9 @@ public class ChartPainter: BaseChartPainter {
         
         // 选中价格文字颜色：白色
         let textColor = chartColors.selectedPriceTextColor
-        let text = NSAttributedString(string: format(selectedPrice), attributes: getTextStyle(textColor))
+        var text = format(selectedPrice)
+        // 应用选中价格文字颜色
+        text = NSAttributedString(string: text.string, attributes: getTextStyle(textColor))
         let textHeight = text.size().height
         let textWidth = text.size().width
         
@@ -308,15 +310,26 @@ public class ChartPainter: BaseChartPainter {
         let amplitudePct = point.open == 0 ? 0 : (point.high - point.low) / point.open * 100
 
         let timeText = NSAttributedString(string: DataUtil.getDate(point.timestamp), attributes: getTextStyle(valueColor))
-        let openText = NSAttributedString(string: format(point.open), attributes: getTextStyle(valueColor))
-        let highText = NSAttributedString(string: format(point.high), attributes: getTextStyle(valueColor))
-        let lowText = NSAttributedString(string: format(point.low), attributes: getTextStyle(valueColor))
-        let closeText = NSAttributedString(string: format(point.close), attributes: getTextStyle(valueColor))
+        var openText = format(point.open)
+        openText = NSAttributedString(string: openText.string, attributes: getTextStyle(valueColor))
+        var highText = format(point.high)
+        highText = NSAttributedString(string: highText.string, attributes: getTextStyle(valueColor))
+        var lowText = format(point.low)
+        lowText = NSAttributedString(string: lowText.string, attributes: getTextStyle(valueColor))
+        var closeText = format(point.close)
+        closeText = NSAttributedString(string: closeText.string, attributes: getTextStyle(valueColor))
         let changeColor = change >= 0 ? upColor : downColor
-        let changeText = NSAttributedString(string: "\(format(change)) (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor))
+        let changeFormatted = format(change)
+        let changeText = NSMutableAttributedString(attributedString: changeFormatted)
+        // 应用颜色到格式化后的文本
+        changeText.addAttributes(getTextStyle(changeColor), range: NSRange(location: 0, length: changeFormatted.length))
+        // 追加百分比部分
+        changeText.append(NSAttributedString(string: " (\(String(format: "%.2f", changePct))%)", attributes: getTextStyle(changeColor)))
         let amplitudeText = NSAttributedString(string: String(format: "%.2f%%", amplitudePct), attributes: getTextStyle(valueColor))
-        let volumeText = NSAttributedString(string: formatVolume(point.volume), attributes: getTextStyle(valueColor))
-        let amountText = NSAttributedString(string: formatVolume(point.amount), attributes: getTextStyle(valueColor))
+        var volumeText = formatVolume(point.volume)
+        volumeText = NSAttributedString(string: volumeText.string, attributes: getTextStyle(valueColor))
+        var amountText = formatVolume(point.amount)
+        amountText = NSAttributedString(string: amountText.string, attributes: getTextStyle(valueColor))
 
         let i18n = chartConfiguration.infoPanelTexts
         let labels = [
@@ -409,12 +422,16 @@ public class ChartPainter: BaseChartPainter {
         let minY = mainRenderer?.getY(mainLowMinValue) ?? 0
         
         if minX < width / 2 {
-            let text = NSAttributedString(string: "── \(format(mainLowMinValue))", 
-                                        attributes: getTextStyle(chartColors.maxMinTextColor))
+            let formatted = format(mainLowMinValue)
+            let text = NSMutableAttributedString(string: "── ", attributes: getTextStyle(chartColors.maxMinTextColor))
+            text.append(formatted)
+            text.addAttributes(getTextStyle(chartColors.maxMinTextColor), range: NSRange(location: 0, length: text.length))
             text.draw(at: CGPoint(x: minX, y: minY - text.size().height / 2))
         } else {
-            let text = NSAttributedString(string: "\(format(mainLowMinValue)) ──", 
-                                        attributes: getTextStyle(chartColors.maxMinTextColor))
+            let formatted = format(mainLowMinValue)
+            let text = NSMutableAttributedString(attributedString: formatted)
+            text.append(NSAttributedString(string: " ──", attributes: getTextStyle(chartColors.maxMinTextColor)))
+            text.addAttributes(getTextStyle(chartColors.maxMinTextColor), range: NSRange(location: 0, length: text.length))
             text.draw(at: CGPoint(x: minX - text.size().width, y: minY - text.size().height / 2))
         }
         
@@ -422,12 +439,16 @@ public class ChartPainter: BaseChartPainter {
         let maxY = mainRenderer?.getY(mainHighMaxValue) ?? 0
         
         if maxX < width / 2 {
-            let text = NSAttributedString(string: "── \(format(mainHighMaxValue))", 
-                                        attributes: getTextStyle(chartColors.maxMinTextColor))
+            let formatted = format(mainHighMaxValue)
+            let text = NSMutableAttributedString(string: "── ", attributes: getTextStyle(chartColors.maxMinTextColor))
+            text.append(formatted)
+            text.addAttributes(getTextStyle(chartColors.maxMinTextColor), range: NSRange(location: 0, length: text.length))
             text.draw(at: CGPoint(x: maxX, y: maxY - text.size().height / 2))
         } else {
-            let text = NSAttributedString(string: "\(format(mainHighMaxValue)) ──", 
-                                        attributes: getTextStyle(chartColors.maxMinTextColor))
+            let formatted = format(mainHighMaxValue)
+            let text = NSMutableAttributedString(attributedString: formatted)
+            text.append(NSAttributedString(string: " ──", attributes: getTextStyle(chartColors.maxMinTextColor)))
+            text.addAttributes(getTextStyle(chartColors.maxMinTextColor), range: NSRange(location: 0, length: text.length))
             text.draw(at: CGPoint(x: maxX - text.size().width, y: maxY - text.size().height / 2))
         }
     }
@@ -482,8 +503,9 @@ public class ChartPainter: BaseChartPainter {
         let point = datas.last!
         // 实时价格文字（使用样式配置）
         let rt = chartConfiguration.chartStyleConfig.realTimePriceStyle
-        let text = NSAttributedString(string: format(point.close), 
-                                    attributes: getTextStyle(rt.labelTextColor))
+        var text = format(point.close)
+        // 应用实时价格文字颜色
+        text = NSAttributedString(string: text.string, attributes: getTextStyle(rt.labelTextColor))
         let textPadding: Double = rt.labelTextPadding
         let y = mainRenderer?.getY(point.close) ?? 0
         

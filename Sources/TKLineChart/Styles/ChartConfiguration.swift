@@ -707,12 +707,14 @@ public class ChartConfiguration {
     public var emaStyle: EMAStyle
     /// 图表样式配置
     public var chartStyleConfig: ChartStyleConfig
-    /// 价格格式化回调：外部可自定义价格显示格式，参数为价格值，返回格式化后的字符串
+    /// 价格格式化回调：外部可自定义价格显示格式，参数为价格值，返回格式化后的 NSAttributedString
     /// 如果为 nil，则使用默认格式化（保留2位小数）
-    public var priceFormatter: ((Double) -> String)?
-    /// 成交量/数量格式化回调：外部可自定义成交量和数量显示格式，参数为数值，返回格式化后的字符串
+    /// 返回 NSAttributedString 可以支持自定义颜色、字体等样式
+    public var priceFormatter: ((Double) -> NSAttributedString)?
+    /// 成交量/数量格式化回调：外部可自定义成交量和数量显示格式，参数为数值，返回格式化后的 NSAttributedString
     /// 如果为 nil，则使用默认格式化（保留2位小数，带缩写：k/M/B/T）
-    public var volumeFormatter: ((Double) -> String)?
+    /// 返回 NSAttributedString 可以支持自定义颜色、字体等样式
+    public var volumeFormatter: ((Double) -> NSAttributedString)?
 
     // MARK: - 信息面板多语言预设
     public enum InfoPanelLocalePreset {

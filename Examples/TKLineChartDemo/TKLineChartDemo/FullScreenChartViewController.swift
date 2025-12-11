@@ -46,14 +46,28 @@ class FullScreenChartViewController: UIViewController {
         // 初始化配置
         chartConfiguration = initialChartConfiguration
         
-        // 配置价格格式化回调：保留4位小数
+        // 配置价格格式化回调：保留4位小数，支持自定义样式
         chartConfiguration.priceFormatter = { price in
-            return String(format: "%.4f", price)
+            let text = String(format: "%.4f", price)
+            return NSAttributedString(
+                string: text,
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 9.0),
+                    .foregroundColor: UIColor.black
+                ]
+            )
         }
         
-        // 配置成交量格式化回调：保留2位小数，带缩写
+        // 配置成交量格式化回调：保留2位小数，带缩写，支持自定义样式
         chartConfiguration.volumeFormatter = { volume in
-            return NumberUtil.abbreviate(volume, 2)
+            let text = NumberUtil.abbreviate(volume, 2)
+            return NSAttributedString(
+                string: text,
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 9.0),
+                    .foregroundColor: UIColor.black
+                ]
+            )
         }
         
         setupChart()

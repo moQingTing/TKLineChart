@@ -83,14 +83,28 @@ NSLayoutConstraint.activate([
 // 创建图表配置
 let chartConfiguration = ChartConfiguration()
 
-// 配置价格格式化回调（可选）
+// 配置价格格式化回调（可选，返回 NSAttributedString 支持自定义样式）
 chartConfiguration.priceFormatter = { price in
-    return String(format: "%.4f", price)  // 保留4位小数
+    let text = String(format: "%.4f", price)  // 保留4位小数
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
 }
 
-// 配置成交量格式化回调（可选）
+// 配置成交量格式化回调（可选，返回 NSAttributedString 支持自定义样式）
 chartConfiguration.volumeFormatter = { volume in
-    return NumberUtil.abbreviate(volume, 2)  // 保留2位小数，带k/M/B/T缩写
+    let text = NumberUtil.abbreviate(volume, 2)  // 保留2位小数，带k/M/B/T缩写
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
 }
 
 chartView.chartConfiguration = chartConfiguration
@@ -188,28 +202,60 @@ chartView.chartColors = chartColors
 
 ### 格式化配置
 ```swift
-// 价格格式化回调：自定义价格显示格式
+// 价格格式化回调：自定义价格显示格式（返回 NSAttributedString 支持样式）
 chartConfiguration.priceFormatter = { price in
-    // 示例1：保留4位小数
-    return String(format: "%.4f", price)
+    // 示例1：保留4位小数，默认样式
+    let text = String(format: "%.4f", price)
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
     
-    // 示例2：使用千分位分隔符
-    // return NumberUtil.format(price, 4)
+    // 示例2：自定义颜色和字体
+    // let text = NumberUtil.format(price, 4)
+    // return NSAttributedString(
+    //     string: text,
+    //     attributes: [
+    //         .font: UIFont.boldSystemFont(ofSize: 10.0),
+    //         .foregroundColor: UIColor.systemBlue
+    //     ]
+    // )
     
-    // 示例3：自定义格式（如添加货币符号）
-    // return "¥\(String(format: "%.2f", price))"
+    // 示例3：带货币符号，不同部分不同颜色
+    // let priceText = String(format: "%.2f", price)
+    // let attributed = NSMutableAttributedString(
+    //     string: "¥\(priceText)",
+    //     attributes: [.font: UIFont.systemFont(ofSize: 9.0)]
+    // )
+    // attributed.addAttribute(.foregroundColor, value: UIColor.red, range: NSRange(location: 0, length: 1))
+    // attributed.addAttribute(.foregroundColor, value: UIColor.black, range: NSRange(location: 1, length: priceText.count))
+    // return attributed
 }
 
-// 成交量格式化回调：自定义成交量和数量显示格式
+// 成交量格式化回调：自定义成交量和数量显示格式（返回 NSAttributedString 支持样式）
 chartConfiguration.volumeFormatter = { volume in
-    // 示例1：使用默认缩写（k/M/B/T）
-    return NumberUtil.abbreviate(volume, 2)
+    // 示例1：使用默认缩写（k/M/B/T），默认样式
+    let text = NumberUtil.abbreviate(volume, 2)
+    return NSAttributedString(
+        string: text,
+        attributes: [
+            .font: UIFont.systemFont(ofSize: 9.0),
+            .foregroundColor: UIColor.black
+        ]
+    )
     
-    // 示例2：保留2位小数，不带缩写
-    // return NumberUtil.format(volume, 2)
-    
-    // 示例3：自定义格式
-    // return String(format: "%.0f", volume)
+    // 示例2：自定义颜色
+    // let text = NumberUtil.format(volume, 2)
+    // return NSAttributedString(
+    //     string: text,
+    //     attributes: [
+    //         .font: UIFont.systemFont(ofSize: 9.0),
+    //         .foregroundColor: UIColor.systemGreen
+    //     ]
+    // )
 }
 
 // 默认行为：

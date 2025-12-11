@@ -11,7 +11,7 @@ public protocol BaseChartRenderer {
     var chartRect: CGRect { get set }
     
     func getY(_ y: Double) -> Double
-    func format(_ n: Double) -> String
+    func format(_ n: Double) -> NSAttributedString
     func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int)
     func drawText(_ canvas: CGContext, data: DataType, x: Double)
     func drawRightText(_ canvas: CGContext, textStyle: [NSAttributedString.Key: Any], gridRows: Int)
@@ -30,13 +30,13 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
     public var chartRect: CGRect
     
     // 价格格式化回调
-    public var priceFormatter: ((Double) -> String)?
+    public var priceFormatter: ((Double) -> NSAttributedString)?
     // 成交量/数量格式化回调
-    public var volumeFormatter: ((Double) -> String)?
+    public var volumeFormatter: ((Double) -> NSAttributedString)?
     
     // 移除这些属性，因为CGContext不能作为实例变量存储
     
-    public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double, priceFormatter: ((Double) -> String)? = nil, volumeFormatter: ((Double) -> String)? = nil) {
+    public init(chartRect: CGRect, maxValue: Double, minValue: Double, topPadding: Double, priceFormatter: ((Double) -> NSAttributedString)? = nil, volumeFormatter: ((Double) -> NSAttributedString)? = nil) {
         self.chartRect = chartRect
         self.maxValue = maxValue
         self.minValue = minValue
@@ -57,20 +57,22 @@ open class BaseChartRendererImpl<T>: BaseChartRenderer {
         return (maxValue - y) * scaleY + Double(chartRect.minY)
     }
     
-    public func format(_ n: Double) -> String {
+    public func format(_ n: Double) -> NSAttributedString {
         if let formatter = priceFormatter {
             return formatter(n)
         }
         // 默认格式化：保留2位小数
-        return NumberUtil.format(n, 2)
+        let text = NumberUtil.format(n, 2)
+        return NSAttributedString(string: text, attributes: getTextStyle(UIColor.black, fontSize: 9.0))
     }
     
-    public func formatVolume(_ n: Double) -> String {
+    public func formatVolume(_ n: Double) -> NSAttributedString {
         if let formatter = volumeFormatter {
             return formatter(n)
         }
         // 默认格式化：保留2位小数，带缩写（k/M/B/T）
-        return NumberUtil.abbreviate(n, 2)
+        let text = NumberUtil.abbreviate(n, 2)
+        return NSAttributedString(string: text, attributes: getTextStyle(UIColor.black, fontSize: 9.0))
     }
     
     open func drawGrid(_ canvas: CGContext, gridRows: Int, gridColumns: Int) {

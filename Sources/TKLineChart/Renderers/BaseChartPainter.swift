@@ -38,9 +38,9 @@ open class BaseChartPainter {
     public var marginRight: Double = 0.0
     
     // 价格格式化回调
-    public var priceFormatter: ((Double) -> String)?
+    public var priceFormatter: ((Double) -> NSAttributedString)?
     // 成交量/数量格式化回调
-    public var volumeFormatter: ((Double) -> String)?
+    public var volumeFormatter: ((Double) -> NSAttributedString)?
     
     // 时间格式化
     public var formats: [String] = [
@@ -295,19 +295,21 @@ open class BaseChartPainter {
         ]
     }
     
-    public func format(_ n: Double) -> String {
+    public func format(_ n: Double) -> NSAttributedString {
         if let formatter = priceFormatter {
             return formatter(n)
         }
         // 默认格式化：保留2位小数
-        return NumberUtil.format(n, 2)
+        let text = NumberUtil.format(n, 2)
+        return NSAttributedString(string: text, attributes: getTextStyle(UIColor.black))
     }
     
-    public func formatVolume(_ n: Double) -> String {
+    public func formatVolume(_ n: Double) -> NSAttributedString {
         if let formatter = volumeFormatter {
             return formatter(n)
         }
         // 默认格式化：保留2位小数，带缩写（k/M/B/T）
-        return NumberUtil.abbreviate(n, 2)
+        let text = NumberUtil.abbreviate(n, 2)
+        return NSAttributedString(string: text, attributes: getTextStyle(UIColor.black))
     }
 }
