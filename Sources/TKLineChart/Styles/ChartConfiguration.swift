@@ -290,8 +290,8 @@ public class ChartConfiguration {
     ///   - infoPanelStyle: 信息面板样式
     ///   - emaStyle: EMA样式
     ///   - chartStyleConfig: 图表样式配置
-    ///   - priceFormatter: 价格格式化回调，nil 时使用默认格式化（保留2位小数）
-    ///   - volumeFormatter: 成交量/数量格式化回调，nil 时使用默认格式化（保留2位小数，带缩写）
+    ///   - priceFormatter: 价格格式化回调，返回 NSAttributedString 支持自定义样式，nil 时使用默认格式化（保留2位小数）
+    ///   - volumeFormatter: 成交量/数量格式化回调，返回 NSAttributedString 支持自定义样式，nil 时使用默认格式化（保留2位小数，带缩写）
     public init(
         candleStyle: CandleStyle = CandleStyle(),
         movingAverageStyle: MovingAverageStyle = MovingAverageStyle(),
@@ -309,8 +309,8 @@ public class ChartConfiguration {
         infoPanelStyle: InfoPanelStyle = InfoPanelStyle(),
         emaStyle: EMAStyle = EMAStyle(),
         chartStyleConfig: ChartStyleConfig = ChartStyleConfig(),
-        priceFormatter: ((Double) -> String)? = nil,
-        volumeFormatter: ((Double) -> String)? = nil
+        priceFormatter: ((Double) -> NSAttributedString)? = nil,
+        volumeFormatter: ((Double) -> NSAttributedString)? = nil
     ) {
         self.candleStyle = candleStyle
         self.movingAverageStyle = movingAverageStyle
